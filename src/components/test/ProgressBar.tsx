@@ -29,11 +29,11 @@ export const ProgressBar: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5 font-medium">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 font-semibold text-[11px]">
+            <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-semibold text-[11px]">
               Chặng {currentDimIndex + 1}/8
             </span>
-            <span className="font-semibold text-slate-700">
-              {DIMENSION_NAMES[currentDim] || currentDim}
+            <span className="font-medium text-slate-500 text-xs">
+              (Phần {currentDimIndex + 1})
             </span>
           </div>
           <div className="flex items-center gap-1.5">

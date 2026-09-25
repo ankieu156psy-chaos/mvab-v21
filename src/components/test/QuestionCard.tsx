@@ -32,11 +32,8 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
     >
       {/* Item Header */}
       <div className="flex items-center justify-between gap-3 mb-2.5">
-        <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600">
-          #{item.stt.toString().padStart(2, '0')}
-        </span>
-        <span className="text-[11px] font-medium text-slate-400">
-          {item.subscale}
+        <span className="text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">
+          Câu {item.stt.toString().padStart(2, '0')}
         </span>
       </div>
 
