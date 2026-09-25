@@ -62,10 +62,10 @@ export const ReportDashboard: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4">
+    <div className="min-h-screen bg-[#f4efe6] text-stone-900 py-10 px-4 selection:bg-rose-200">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-stone-300/80 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[11px] font-bold tracking-wide">

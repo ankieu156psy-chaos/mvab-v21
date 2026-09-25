@@ -69,7 +69,7 @@ export const AssessmentStage: React.FC = () => {
   const answeredInDim = items.filter((i) => responses[i.id] !== undefined).length;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-24" ref={containerRef}>
+    <div className="min-h-screen bg-[#f4efe6] text-stone-900 pb-24 selection:bg-rose-200" ref={containerRef}>
       <ProgressBar />
 
       <main className="max-w-3xl mx-auto px-4 py-8">
@@ -90,15 +90,16 @@ export const AssessmentStage: React.FC = () => {
         </div>
 
         {/* Bottom Finish Action */}
-        <div className="mt-10 p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-10 p-6 rounded-3xl bg-white/85 backdrop-blur-md border border-stone-300/80 shadow-lg shadow-stone-900/5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <div className="text-sm font-semibold text-slate-800">
+            <div className="text-sm font-semibold text-stone-900 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-rose-600" />
               Tiến độ chặng hiện tại: {answeredInDim}/{items.length} câu
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-stone-500 mt-0.5 font-serif">
               {isComplete
-                ? 'Đã hoàn thành toàn bộ câu hỏi của chặng này.'
-                : 'Vui lòng hoàn thành các câu còn thiếu để mở khóa trạm nghỉ.'}
+                ? 'Đã hoàn thành toàn bộ câu hỏi của chặng này. Mời bạn dừng chân tại bến đỗ.'
+                : 'Vui lòng hoàn thành các câu còn thiếu để mở khóa bến đỗ tiếp theo.'}
             </p>
           </div>
 
@@ -106,13 +107,13 @@ export const AssessmentStage: React.FC = () => {
             type="button"
             disabled={!isComplete}
             onClick={handleFinishDimension}
-            className={`w-full sm:w-auto py-3 px-6 rounded-xl text-sm font-semibold transition-all ${
+            className={`w-full sm:w-auto py-3.5 px-7 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase transition-all shadow-md ${
               isComplete
-                ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-md active:scale-95'
-                : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                ? 'bg-stone-900 hover:bg-stone-800 text-amber-50 shadow-stone-900/20 active:scale-95'
+                : 'bg-stone-200 text-stone-400 cursor-not-allowed'
             }`}
           >
-            Chốt chặng & Nhận diện sơ bộ →
+            Chốt chặng & Bước vào bến đỗ →
           </button>
         </div>
       </main>
