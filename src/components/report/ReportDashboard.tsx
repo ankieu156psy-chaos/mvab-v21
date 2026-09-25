@@ -471,7 +471,7 @@ export const ReportDashboard: React.FC = () => {
               Minh bạch thuật toán tính chỉ số phù hợp (%):
             </div>
             <p className="leading-relaxed">
-              Chỉ số tương thích (%) không phải là điểm số tuyệt đối, mà phản ánh <strong>mức độ hội tụ đa trục</strong> giữa phổ điểm 8 trục năng lực của bạn so với <strong>Hồ sơ Năng lực Tiêu chuẩn (Benchmark Profile)</strong> của từng phân ngành tâm lý theo chuẩn Hiệp hội Tâm lý học Hoa Kỳ (APA) và khung pháp lý hành nghề tại Việt Nam (Luật Khám bệnh, chữa bệnh 2023, Thông tư 20/2023/TT-BGDĐT).
+              Chỉ số tương thích (%) được tính toán bằng <strong>Khoảng cách Mahalanobis chuẩn hóa (Standardized Mahalanobis Distance - D<sub>M</sub>)</strong> đối chiếu trực tiếp giữa phổ điểm 8 trục năng lực của bạn với <strong>Hồ sơ Dữ liệu Thực nghiệm O*NET 28.2</strong> (Bộ Lao động Hoa Kỳ) cho từng mã nghề SOC tâm lý học, kết hợp phân loại chuyên ngành APA và khung pháp lý hành nghề tại Việt Nam (Luật Khám bệnh, chữa bệnh 2023, Thông tư 20/2023/TT-BGDĐT).
             </p>
           </div>
 
@@ -502,8 +502,8 @@ export const ReportDashboard: React.FC = () => {
                 </p>
 
                 {/* Formula Breakdown */}
-                <div className="text-[11px] text-stone-500 font-mono bg-stone-50 p-2.5 rounded-xl border border-stone-200">
-                  <strong>Trọng số cấu thành:</strong> {cluster.formulaExplanation}
+                <div className="text-[11px] text-stone-600 font-mono bg-stone-50 p-2.5 rounded-xl border border-stone-200">
+                  <strong className="text-stone-800">Chuẩn đối chiếu & Khoảng cách:</strong> {cluster.formulaExplanation}
                 </div>
 
                 {/* Core Drivers vs Growth Areas */}

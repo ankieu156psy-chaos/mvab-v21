@@ -144,11 +144,72 @@ export function auditIER(responses: Record<string, number>): IERAuditResult {
   };
 }
 
-// Career Clusters Evaluation
+import { 
+  ONET_BENCHMARK_PROFILES, 
+  calculateMahalanobisFit, 
+  OnetTargetVector 
+} from './onet-benchmarks';
+
+// Career Clusters Evaluation via Empirical O*NET Benchmarks & Mahalanobis Distance
 export function evaluateCareerClusters(s: DimensionScores): CareerMatch[] {
-  const calcMatch = (rawFit: number, maxBenchmark = 72) => {
-    return Math.min(98, Math.max(35, Math.round((rawFit / maxBenchmark) * 100)));
+  const getMatch = (clusterId: string, userVector: OnetTargetVector) => {
+    const benchmark = ONET_BENCHMARK_PROFILES.find(b => b.clusterId === clusterId);
+    if (!benchmark) {
+      return { match: 50, dist: 2.0, soc: 'N/A', title: '' };
+    }
+    const fit = calculateMahalanobisFit(userVector, benchmark);
+    return {
+      match: fit.matchPercentage,
+      dist: fit.mahalanobisDistance,
+      soc: benchmark.socCode,
+      title: benchmark.title
+    };
   };
+
+  const fit1 = getMatch('cluster_1', {
+    d1: s.d1_micro_t, d2: s.d2_amb_t, d3: s.d3_emp_t, d4: s.d4_people_t,
+    d5_pt: s.d5_pt_t, d5_pd: s.d5_pd_t, d6: s.d6_rfq_t, d7: s.d7_hea_t, d8: s.d8_fut_t
+  });
+
+  const fit2 = getMatch('cluster_2', {
+    d1: s.d1_micro_t, d2: s.d2_amb_t, d3: s.d3_rel_t, d4: s.d4_people_t,
+    d5_pt: s.d5_pt_t, d5_pd: s.d5_pd_t, d6: s.d6_rfq_t, d7: s.d7_hea_t, d8: s.d8_fut_t
+  });
+
+  const fit3 = getMatch('cluster_3', {
+    d1: s.d1_meso_t, d2: s.d2_amb_t, d3: s.d3_rel_t, d4: s.d4_people_t,
+    d5_pt: s.d5_pt_t, d5_pd: s.d5_pd_t, d6: s.d6_rfq_t, d7: s.d7_hea_t, d8: s.d8_fut_t
+  });
+
+  const fit4 = getMatch('cluster_4', {
+    d1: s.d1_meso_t, d2: s.d2_amb_t, d3: s.d3_emp_t, d4: s.d4_people_t,
+    d5_pt: s.d5_pt_t, d5_pd: s.d5_pd_t, d6: s.d6_rfq_t, d7: s.d7_hea_t, d8: s.d8_fut_t
+  });
+
+  const fit5 = getMatch('cluster_5', {
+    d1: s.d1_macro_t, d2: s.d2_amb_t, d3: s.d3_emp_t, d4: s.d4_data_t,
+    d5_pt: s.d5_pt_t, d5_pd: s.d5_pd_t, d6: s.d6_rfq_t, d7: s.d7_hea_t, d8: s.d8_fut_t
+  });
+
+  const fit6 = getMatch('cluster_6', {
+    d1: s.d1_meso_t, d2: s.d2_amb_t, d3: s.d3_tec_t, d4: s.d4_data_t,
+    d5_pt: s.d5_pt_t, d5_pd: s.d5_pd_t, d6: s.d6_rfq_t, d7: s.d7_hea_t, d8: s.d8_fut_t
+  });
+
+  const fit7 = getMatch('cluster_7', {
+    d1: s.d1_micro_t, d2: s.d2_amb_t, d3: s.d3_emp_t, d4: s.d4_people_t,
+    d5_pt: s.d5_pt_t, d5_pd: s.d5_pd_t, d6: s.d6_rfq_t, d7: s.d7_hea_t, d8: s.d8_fut_t
+  });
+
+  const fit8 = getMatch('cluster_8', {
+    d1: s.d1_macro_t, d2: s.d2_amb_t, d3: s.d3_emp_t, d4: s.d4_data_t,
+    d5_pt: s.d5_pt_t, d5_pd: s.d5_pd_t, d6: s.d6_rfq_t, d7: s.d7_hea_t, d8: s.d8_fut_t
+  });
+
+  const fit9 = getMatch('cluster_9', {
+    d1: s.d1_macro_t, d2: s.d2_amb_t, d3: s.d3_emp_t, d4: s.d4_data_t,
+    d5_pt: s.d5_pt_t, d5_pd: s.d5_pd_t, d6: s.d6_rfq_t, d7: s.d7_hea_t, d8: s.d8_fut_t
+  });
 
   const clusters: CareerMatch[] = [
     {
@@ -157,8 +218,8 @@ export function evaluateCareerClusters(s: DimensionScores): CareerMatch[] {
       legal: 'Luật Khám bệnh, chữa bệnh 2023 & NĐ 96/2023/NĐ-CP: Yêu cầu tối thiểu 09 tháng thực hành có hướng dẫn tại cơ sở khám chữa bệnh nội trú để đủ điều kiện cấp Giấy phép hành nghề.',
       apa: 'APA Div 12 (Society of Clinical Psychology), Div 40 (Clinical Neuropsychology), Div 56 (Trauma Psychology), Div 38 (Health Psychology)',
       desc: 'Thực hành chẩn đoán tâm lý, lượng giá suy giảm chức năng nhận thức/hành vi, và can thiệp trị liệu tâm lý trong môi trường bệnh viện đa khoa, bệnh viện chuyên khoa tâm thần hoặc trung tâm phục hồi chức năng.',
-      formulaExplanation: 'Chỉ số tương thích = 35% Can thiệp vi mô 1-1 + 25% Bằng chứng thực nghiệm + 20% Liên minh trị liệu + 20% Năng lực ổn định cảm xúc',
-      match: calcMatch(s.d1_micro_t * 0.35 + s.d3_emp_t * 0.25 + s.d3_rel_t * 0.2 + (80 - s.d5_pd_t) * 0.2),
+      formulaExplanation: `Khoảng cách Mahalanobis DM = ${fit1.dist} (Đối chiếu chuẩn O*NET ${fit1.soc}: ${fit1.title})`,
+      match: fit1.match,
       coreDrivers: [
         s.d1_micro_t >= 55 ? `Can thiệp vi mô cá nhân (T=${s.d1_micro_t}) đáp ứng yêu cầu phiên làm việc 1-1 chuyên sâu.` : '',
         s.d3_emp_t >= 55 ? `Tư duy thực nghiệm (T=${s.d3_emp_t}) phù hợp với phác đồ can thiệp dựa trên chứng cứ (EBP).` : '',
@@ -176,8 +237,8 @@ export function evaluateCareerClusters(s: DimensionScores): CareerMatch[] {
       legal: 'Bộ luật Dân sự & Luật Doanh nghiệp: Hành nghề tự do, thành lập văn phòng tham vấn tư nhân hoặc hợp tác với các trung tâm tâm lý học độc lập.',
       apa: 'APA Div 17 (Society of Counseling Psychology), Div 29 (Society for the Advancement of Psychotherapy), Div 32 (Society for Humanistic Psychology)',
       desc: 'Đồng hành hỗ trợ cá nhân và gia đình tháo gỡ khủng hoảng đời sống, mâu thuẫn mối quan hệ, thích ứng chuyển giai đoạn và khơi mở tiềm năng phát triển nội tâm.',
-      formulaExplanation: 'Chỉ số tương thích = 40% Tương tác vi mô + 30% Mối quan hệ nhân văn + 20% Định hướng con người + 10% Thấu cảm nhận thức',
-      match: calcMatch(s.d1_micro_t * 0.4 + s.d3_rel_t * 0.3 + s.d4_people_t * 0.2 + s.d5_pt_t * 0.1),
+      formulaExplanation: `Khoảng cách Mahalanobis DM = ${fit2.dist} (Đối chiếu chuẩn O*NET ${fit2.soc}: ${fit2.title})`,
+      match: fit2.match,
       coreDrivers: [
         s.d3_rel_t >= 55 ? `Phong cách nhân văn (T=${s.d3_rel_t}) là nền tảng xây dựng liên minh tham vấn an toàn.` : '',
         s.d4_people_t >= 55 ? `Nhu cầu làm việc với con người cao (T=${s.d4_people_t}) tạo nguồn năng lượng dồi dào trong các phiên đối thoại.` : '',
@@ -195,8 +256,8 @@ export function evaluateCareerClusters(s: DimensionScores): CareerMatch[] {
       legal: 'Thông tư số 20/2023/TT-BGDĐT: Quy định mã số, tiêu chuẩn chức danh nghề nghiệp Viên chức Tư vấn học sinh (Mã số V.07.07.24) trong các cơ sở giáo dục phổ thông.',
       apa: 'APA Div 16 (School Psychology), Div 53 (Clinical Child & Adolescent), Div 7 (Developmental Psychology)',
       desc: 'Đánh giá phát triển trẻ em, can thiệp sớm các rối loạn học tập và phát triển thần kinh (ADHD, Tự kỷ), tư vấn khó khăn tâm lý học đường và phối hợp gia đình - nhà trường.',
-      formulaExplanation: 'Chỉ số tương thích = 35% Can thiệp trung mô hệ thống + 25% Tương tác cá nhân + 25% Định hướng con người + 15% Quan hệ thấu cảm',
-      match: calcMatch(s.d1_meso_t * 0.35 + s.d1_micro_t * 0.25 + s.d4_people_t * 0.25 + s.d3_rel_t * 0.15),
+      formulaExplanation: `Khoảng cách Mahalanobis DM = ${fit3.dist} (Đối chiếu chuẩn O*NET ${fit3.soc}: ${fit3.title})`,
+      match: fit3.match,
       coreDrivers: [
         s.d1_meso_t >= 55 ? `Khả năng tương tác trung mô (T=${s.d1_meso_t}) giúp kết nối hiệu quả giữa học sinh, phụ huynh và giáo viên.` : '',
         s.d4_people_t >= 55 ? `Sự kiên nhẫn với trẻ em và thanh thiếu niên (T=${s.d4_people_t}) tạo điểm tựa tâm lý vững vàng.` : ''
@@ -212,8 +273,8 @@ export function evaluateCareerClusters(s: DimensionScores): CareerMatch[] {
       legal: 'Bộ luật Lao động 2019: Khối doanh nghiệp tư nhân, tập đoàn đa quốc gia, công ty tư vấn quản trị và các chương trình Hỗ trợ Nhân viên (EAP).',
       apa: 'APA Div 14 (Society for Industrial and Organizational Psychology - SIOP), Div 13 (Society of Consulting Psychology)',
       desc: 'Ứng dụng các quy luật tâm lý vào tuyển dụng nhân tài, đánh giá năng lực (Assessment Center), xây dựng văn hóa doanh nghiệp, đào tạo phát triển (L&D) và thiết kế phúc lợi tâm lý.',
-      formulaExplanation: 'Chỉ số tương thích = 40% Tác động trung mô tổ chức + 30% Hướng con người + 15% Tầm nhìn thực tế + 15% Định hướng tương lai',
-      match: calcMatch(s.d1_meso_t * 0.4 + s.d4_people_t * 0.3 + 52 * 0.15 + s.d8_fut_t * 0.15),
+      formulaExplanation: `Khoảng cách Mahalanobis DM = ${fit4.dist} (Đối chiếu chuẩn O*NET ${fit4.soc}: ${fit4.title})`,
+      match: fit4.match,
       coreDrivers: [
         s.d1_meso_t >= 55 ? `Hiểu biết về văn hóa tổ chức và động lực nhóm (T=${s.d1_meso_t}) là lợi thế lớn trong môi trường doanh nghiệp.` : '',
         s.d8_fut_t >= 55 ? `Tầm nhìn chiến lược dài hạn (T=${s.d8_fut_t}) giúp hoạch định các chính sách phát triển nhân tài bền vững.` : ''
@@ -229,8 +290,8 @@ export function evaluateCareerClusters(s: DimensionScores): CareerMatch[] {
       legal: 'Luật Thương mại & Luật Bảo vệ Quyền lợi Người tiêu dùng: Các tập đoàn bán lẻ, thương mại điện tử, công ty nghiên cứu thị trường và agency truyền thông.',
       apa: 'APA Div 23 (Society for Consumer Psychology), Div 46 (Society for Media Psychology and Technology)',
       desc: 'Giải mã quá trình ra quyết định của khách hàng, ứng dụng các hiệu ứng thiên kiến nhận thức (Cognitive Biases) và thiết kế cú hích hành vi (Nudge) để tối ưu hóa chiến lược tiếp thị.',
-      formulaExplanation: 'Chỉ số tương thích = 35% Xử lý dữ liệu + 25% Phân tích thực nghiệm + 25% Dung nạp mơ hồ + 15% Quy mô vĩ mô',
-      match: calcMatch(s.d4_data_t * 0.35 + s.d3_emp_t * 0.25 + s.d2_amb_t * 0.25 + s.d1_macro_t * 0.15),
+      formulaExplanation: `Khoảng cách Mahalanobis DM = ${fit5.dist} (Đối chiếu chuẩn O*NET ${fit5.soc}: ${fit5.title})`,
+      match: fit5.match,
       coreDrivers: [
         s.d4_data_t >= 55 ? `Tư duy dữ liệu (T=${s.d4_data_t}) giúp bóc tách hành vi người dùng qua các bộ chỉ số định lượng.` : '',
         s.d2_amb_t >= 55 ? `Khả năng dung nạp bất định (T=${s.d2_amb_t}) thích ứng tốt với sự biến động nhanh của thị trường.` : ''
@@ -246,8 +307,8 @@ export function evaluateCareerClusters(s: DimensionScores): CareerMatch[] {
       legal: 'Luật Công nghệ thông tin & Sở hữu trí tuệ: Các công ty phần mềm, studio trò chơi, trung tâm nghiên cứu AI và các phòng thí nghiệm tương tác Người - Máy (HCI).',
       apa: 'APA Div 21 (Applied Experimental & Engineering Psychology), Div 3 (Experimental Psychology), Div 40 (Clinical Neuropsychology)',
       desc: 'Nghiên cứu mô hình tải nhận thức (Cognitive Load), bản đồ chú ý thị giác và khả năng phản xạ hành vi nhằm thiết kế giao diện số, thiết bị thông minh và đảm bảo an toàn trải nghiệm người dùng.',
-      formulaExplanation: 'Chỉ số tương thích = 40% Kỹ thuật công nghệ + 30% Phân tích dữ liệu + 20% Tác nghiệp công cụ + 10% Linh hoạt nhận thức',
-      match: calcMatch(s.d3_tec_t * 0.4 + s.d4_data_t * 0.3 + s.d4_things_t * 0.2 + s.d2_amb_t * 0.1),
+      formulaExplanation: `Khoảng cách Mahalanobis DM = ${fit6.dist} (Đối chiếu chuẩn O*NET ${fit6.soc}: ${fit6.title})`,
+      match: fit6.match,
       coreDrivers: [
         s.d3_tec_t >= 55 ? `Sự nhạy bén với công nghệ (T=${s.d3_tec_t}) giúp bắc cầu giữa tâm lý học nhận thức và lập trình sản phẩm.` : '',
         s.d4_data_t >= 55 ? `Năng lực xử lý dữ liệu kiểm thử (T=${s.d4_data_t}) tối ưu hóa độ chính xác của các bài A/B Testing.` : ''
@@ -263,8 +324,8 @@ export function evaluateCareerClusters(s: DimensionScores): CareerMatch[] {
       legal: 'Luật Thể dục, Thể thao: Các trung tâm huấn luyện thể thao quốc gia, câu lạc bộ bóng đá chuyên nghiệp, đội tuyển Thể thao điện tử (Esports) và học viện nghệ thuật.',
       apa: 'APA Div 47 (Society for Sport, Exercise & Performance Psychology), Div 10 (Society for the Psychology of Aesthetics, Creativity and the Arts)',
       desc: 'Huấn luyện kỹ năng tâm lý (PST), duy trì sự tập trung dưới áp lực thi đấu, điều hòa lo âu trước trận đấu, phục hồi tâm lý sau chấn thương và duy trì trạng thái dòng chảy (Flow).',
-      formulaExplanation: 'Chỉ số tương thích = 30% Hỗ trợ cá nhân + 30% Phương pháp thực nghiệm + 20% Vững vàng cảm xúc + 20% Ứng biến tình huống',
-      match: calcMatch(s.d1_micro_t * 0.3 + s.d3_emp_t * 0.3 + (80 - s.d5_pd_t) * 0.2 + s.d2_amb_t * 0.2),
+      formulaExplanation: `Khoảng cách Mahalanobis DM = ${fit7.dist} (Đối chiếu chuẩn O*NET ${fit7.soc}: ${fit7.title})`,
+      match: fit7.match,
       coreDrivers: [
         s.d5_pd_t < 48 ? `Tâm lý vững vàng không bị lây lan hoảng loạn (T=${s.d5_pd_t}) là phẩm chất then chốt khi đồng hành với vận động viên.` : '',
         s.d3_emp_t >= 55 ? `Áp dụng các kỹ thuật phản hồi sinh học (Biofeedback) và đo lường thời gian phản xạ bài bản.` : ''
@@ -280,8 +341,8 @@ export function evaluateCareerClusters(s: DimensionScores): CareerMatch[] {
       legal: 'Luật Giám định tư pháp & Bộ luật Tố tụng Hình sự: Viện Pháp y Tâm thần Trung ương, tòa án, cơ sở giam giữ và các cơ quan bảo vệ pháp luật.',
       apa: 'APA Div 41 (American Psychology-Law Society), Div 18 (Psychologists in Public Service)',
       desc: 'Đánh giá năng lực hành vi và trách nhiệm hình sự, giám định tâm thần tư pháp, phân tích động cơ hành vi tội phạm, hỗ trợ tâm lý nạn nhân và người làm chứng tại tòa.',
-      formulaExplanation: 'Chỉ số tương thích = 35% Bằng chứng thực nghiệm + 25% Vững vàng cảm xúc + 20% Tầm nhìn quy chuẩn pháp luật + 20% Dung nạp phức tạp',
-      match: calcMatch(s.d3_emp_t * 0.35 + (80 - s.d5_pd_t) * 0.25 + s.d1_macro_t * 0.2 + s.d2_amb_t * 0.2),
+      formulaExplanation: `Khoảng cách Mahalanobis DM = ${fit8.dist} (Đối chiếu chuẩn O*NET ${fit8.soc}: ${fit8.title})`,
+      match: fit8.match,
       coreDrivers: [
         s.d3_emp_t >= 55 ? `Tư duy logic chứng cứ chặt chẽ (T=${s.d3_emp_t}) đảm bảo tính hợp thức của báo cáo giám định tư pháp.` : '',
         s.d5_pd_t < 48 ? `Khả năng giữ vững sự bình thản trước các tình tiết phạm tội bạo lực hoặc sang chấn nặng nề.` : ''
@@ -297,8 +358,8 @@ export function evaluateCareerClusters(s: DimensionScores): CareerMatch[] {
       legal: 'Luật Giáo dục Đại học & Luật Khoa học và Công nghệ: Các trường đại học, viện nghiên cứu chuyên ngành, tổ chức quốc tế và các cơ quan khảo thí.',
       apa: 'APA Div 2 (Society for the Teaching of Psychology), Div 5 (Quantitative and Qualitative Methods / Evaluation, Measurement & Statistics)',
       desc: 'Giảng dạy các bộ môn tâm lý học, thiết kế và thẩm định độ tin cậy/độ hiệu lực của thang đo tâm trắc (Psychometrics), thực hiện các đề tài nghiên cứu cơ bản và ứng dụng.',
-      formulaExplanation: 'Chỉ số tương thích = 35% Tư duy số liệu + 25% Phương pháp nghiên cứu + 25% Tầm nhìn vĩ mô + 15% Cam kết học thuật dài hạn',
-      match: calcMatch(s.d4_data_t * 0.35 + s.d3_emp_t * 0.25 + s.d1_macro_t * 0.25 + s.d8_fut_t * 0.15),
+      formulaExplanation: `Khoảng cách Mahalanobis DM = ${fit9.dist} (Đối chiếu chuẩn O*NET ${fit9.soc}: ${fit9.title})`,
+      match: fit9.match,
       coreDrivers: [
         s.d4_data_t >= 55 ? `Khả năng làm việc với số liệu thống kê (T=${s.d4_data_t}) là công cụ then chốt trong nghiên cứu định lượng.` : '',
         s.d8_fut_t >= 55 ? `Cam kết dài hạn và định hướng học tập suốt đời (T=${s.d8_fut_t}) phù hợp với con đường học thuật.` : ''
