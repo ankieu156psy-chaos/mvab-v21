@@ -1,17 +1,33 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import { useTestStore } from '@/stores/test-store';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { useTestStore, DIMENSIONS_ORDER } from '@/stores/test-store';
+import { ITEMS_DATA } from '@/lib/items';
 import { ProgressBar } from './ProgressBar';
 import { QuestionCard } from './QuestionCard';
 
 export const AssessmentStage: React.FC = () => {
-  const currentDim = useTestStore((s) => s.getCurrentDimension());
-  const items = useTestStore((s) => s.getItemsForCurrentDimension());
+  // Select only primitive/stable state to avoid returning a fresh
+  // array from the selector on every render (which caused an infinite
+  // update loop via useSyncExternalStore).
+  const currentDimIndex = useTestStore((s) => s.currentDimIndex);
   const responses = useTestStore((s) => s.responses);
   const answerQuestion = useTestStore((s) => s.answerQuestion);
-  const isComplete = useTestStore((s) => s.isCurrentDimensionComplete());
   const setPhase = useTestStore((s) => s.setPhase);
+
+  const currentDim = DIMENSIONS_ORDER[currentDimIndex] || 'D1';
+
+  const items = useMemo(() => {
+    if (currentDim === 'D8') {
+      return ITEMS_DATA.filter((item) => item.dim === 'D8' || item.dim === 'IER');
+    }
+    return ITEMS_DATA.filter((item) => item.dim === currentDim);
+  }, [currentDim]);
+
+  const isComplete = useMemo(
+    () => items.every((item) => responses[item.id] !== undefined),
+    [items, responses]
+  );
 
   const containerRef = useRef<HTMLDivElement>(null);
 
