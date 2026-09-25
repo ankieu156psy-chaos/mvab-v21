@@ -154,31 +154,60 @@ export const DongSonRadarChart: React.FC<DongSonRadarChartProps> = ({ scores }) 
           className="transition-all duration-500 ease-out"
         />
 
-        {/* Data Points (Clickable / Hoverable) */}
-        {points.map((p) => (
-          <circle
-            key={p.id}
-            cx={p.x}
-            cy={p.y}
-            r={activePoint?.id === p.id ? 6 : 4}
-            fill="#38bdf8"
-            stroke="#ffffff"
-            strokeWidth="1.5"
-            className="cursor-pointer transition-all hover:scale-125"
-            onMouseEnter={() => setActivePoint(p)}
-            onMouseLeave={() => setActivePoint(null)}
-          />
-        ))}
+        {/* Data Points (Clickable / Hoverable with larger invisible hit area) */}
+        {points.map((p) => {
+          const isSelected = activePoint?.id === p.id;
+          return (
+            <g key={p.id} className="cursor-pointer">
+              {/* Invisible Hit Area (Radius 18px) to prevent flicker */}
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={18}
+                fill="transparent"
+                onClick={() => setActivePoint(activePoint?.id === p.id ? null : p)}
+                onMouseEnter={() => setActivePoint(p)}
+              />
+
+              {/* Pulsing ring when active */}
+              {isSelected && (
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={10}
+                  fill="none"
+                  stroke="#38bdf8"
+                  strokeWidth="1.5"
+                  opacity={0.8}
+                  className="animate-ping"
+                  style={{ transformOrigin: `${p.x}px ${p.y}px` }}
+                />
+              )}
+
+              {/* Visible Data Point */}
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={isSelected ? 6 : 4}
+                fill={isSelected ? '#38bdf8' : '#818cf8'}
+                stroke="#ffffff"
+                strokeWidth={isSelected ? 2 : 1.5}
+                className="pointer-events-none transition-all duration-200"
+              />
+            </g>
+          );
+        })}
       </svg>
 
-      {/* Hover Info Tooltip */}
-      <div className="h-6 mt-2 text-center text-xs font-mono text-indigo-300">
+      {/* Info Tooltip / Selected Point Info */}
+      <div className="h-7 mt-3 px-4 py-1 rounded-full bg-slate-950/80 border border-indigo-900/60 text-center text-xs font-mono text-indigo-300 flex items-center justify-center gap-2">
         {activePoint ? (
           <span>
-            {activePoint.name}: <strong className="text-white">T-Score {activePoint.score}</strong>
+            <strong className="text-white">{activePoint.name}</strong> ({activePoint.id}):{' '}
+            <span className="text-cyan-400 font-bold">T-Score {activePoint.score}</span>
           </span>
         ) : (
-          <span className="text-slate-400">Rê chuột vào các điểm để xem chi tiết T-score</span>
+          <span className="text-slate-400">Nhấp hoặc rê chuột vào các điểm để xem chi tiết T-score</span>
         )}
       </div>
     </div>

@@ -27,44 +27,47 @@ export const HeroLanding: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 text-white overflow-hidden">
-      {/* 3D Fluid Ink Particle Simulation */}
+    <div className="relative min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-[#060913] via-[#091122] to-[#040711] text-white overflow-hidden select-none">
+      {/* 3D Ancient Lotus Pond Canvas with Water Ripples */}
       <FluidInkCanvas />
 
-      {/* Subtle Background Glow Circles */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Subtle Moon & Night Atmosphere Glow */}
+      <div className="absolute top-1/6 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-amber-100/[0.04] rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-950/20 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Center Glass Card */}
-      <div className="relative max-w-xl w-full p-8 sm:p-10 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl text-center">
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-semibold text-indigo-300 mb-6">
-          <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-          Hệ Thống Đánh Giá Tâm Trắc Chuẩn Hóa
+      {/* Center Frosted Dó Card */}
+      <div className="relative max-w-xl w-full p-8 sm:p-11 rounded-3xl bg-slate-950/50 backdrop-blur-2xl border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.8)] text-center">
+        {/* Poetic Chapter Badge */}
+        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-amber-500/20 text-xs font-mono tracking-widest text-amber-200/90 mb-6">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+          CHƯƠNG 00 · CỔNG VÀO HỒ NGUYỆT
         </div>
 
-        {/* Title */}
+        {/* Poetic Kage-style Headline */}
+        <h2 className="text-xs uppercase tracking-[0.3em] text-slate-400 font-semibold mb-2">
+          Nơi tĩnh lặng soi tỏ điều chưa thấy
+        </h2>
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-4 leading-tight">
-          MVAB <span className="text-indigo-400">v2.1</span> Engine
+          MVAB <span className="bg-gradient-to-r from-amber-200 via-rose-200 to-indigo-300 bg-clip-text text-transparent">v2.1</span>
         </h1>
 
-        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-8 max-w-md mx-auto">
-          Khung định hướng nghề nghiệp, phong cách can thiệp lâm sàng và ranh giới giám sát dành cho nhà thực hành tâm lý học.
+        <p className="text-xs sm:text-sm text-slate-300/90 leading-relaxed mb-8 max-w-md mx-auto font-light">
+          Tám không gian tâm trí. Tám chiều kích nội tại. Hãy bước vào một hành trình phản chiếu định hướng nghề nghiệp và phong cách thực hành tâm lý của chính bạn.
         </p>
 
-        {/* 3 Metric Pills */}
-        <div className="grid grid-cols-3 gap-2 py-4 px-2 rounded-2xl bg-white/5 border border-white/5 mb-8 text-center">
+        {/* 3 Metric Pills with Ancient Minimalist Border */}
+        <div className="grid grid-cols-3 gap-2 py-4 px-2 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-8 text-center">
           <div>
-            <div className="text-lg font-bold text-white font-mono">84</div>
-            <div className="text-[10px] text-slate-400">Câu hỏi chuẩn hóa</div>
+            <div className="text-lg font-bold text-amber-100 font-mono">84</div>
+            <div className="text-[10px] text-slate-400">Câu hỏi định chuẩn</div>
           </div>
           <div className="border-x border-white/10">
-            <div className="text-lg font-bold text-white font-mono">8</div>
-            <div className="text-[10px] text-slate-400">Trục năng lực</div>
+            <div className="text-lg font-bold text-emerald-200 font-mono">8</div>
+            <div className="text-[10px] text-slate-400">Chặng khám phá</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-white font-mono">15'</div>
-            <div className="text-[10px] text-slate-400">Thời gian làm</div>
+            <div className="text-lg font-bold text-rose-200 font-mono">15'</div>
+            <div className="text-[10px] text-slate-400">Tĩnh tâm đồng hành</div>
           </div>
         </div>
 
@@ -73,15 +76,15 @@ export const HeroLanding: React.FC = () => {
           <button
             type="button"
             onClick={() => setPhase('consent')}
-            className="w-full py-4 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm tracking-wide shadow-lg shadow-indigo-600/30 active:scale-95 transition-all"
+            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-slate-800 hover:from-indigo-600 hover:to-slate-700 text-white font-semibold text-sm tracking-wider shadow-lg shadow-indigo-950/60 active:scale-95 transition-all border border-indigo-400/30"
           >
-            Bắt đầu bài đánh giá →
+            Bắt đầu hành trình →
           </button>
 
           <button
             type="button"
             onClick={fillQuickDemo}
-            className="text-xs text-slate-400 hover:text-white transition py-1"
+            className="text-xs text-slate-400/80 hover:text-amber-200 transition py-1 block w-full text-center"
           >
             ⚡ Trải nghiệm nhanh kết quả mẫu (Demo)
           </button>
