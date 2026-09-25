@@ -12,6 +12,7 @@ import { ReportDashboard } from '@/components/report/ReportDashboard';
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const phase = useTestStore((s) => s.phase);
+  const currentDimIndex = useTestStore((s) => s.currentDimIndex);
 
   useEffect(() => {
     setMounted(true);
@@ -19,10 +20,10 @@ export default function Home() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+      <div className="min-h-screen flex items-center justify-center bg-[#f4efe6] text-stone-800">
         <div className="flex items-center gap-3">
-          <span className="w-3 h-3 rounded-full bg-indigo-500 animate-ping" />
-          <span className="text-xs font-mono tracking-widest text-slate-400">
+          <span className="w-3 h-3 rounded-full bg-[#8b2626] animate-ping" />
+          <span className="text-xs font-mono tracking-widest text-stone-600">
             KHỞI TẠO MVAB v2.1...
           </span>
         </div>
@@ -37,9 +38,9 @@ export default function Home() {
       case 'consent':
         return <Consent key="consent" />;
       case 'test':
-        return <AssessmentStage key="test" />;
+        return <AssessmentStage key={`test-${currentDimIndex}`} />;
       case 'checkpoint':
-        return <Checkpoint key="checkpoint" />;
+        return <Checkpoint key={`checkpoint-${currentDimIndex}`} />;
       case 'report':
         return <ReportDashboard key="report" />;
       default:
@@ -50,7 +51,7 @@ export default function Home() {
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key={phase}
+        key={`${phase}-${phase === 'test' || phase === 'checkpoint' ? currentDimIndex : ''}`}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}

@@ -16,17 +16,24 @@ export const Checkpoint: React.FC = () => {
 
   const [hasViewedDetail, setHasViewedDetail] = useState(false);
   const [secondsSpent, setSecondsSpent] = useState(0);
-  const [insight, setInsight] = useState<DimensionInsight>(
+  const [insight, setInsight] = useState<DimensionInsight>(() =>
     PREBUILT_INSIGHTS[currentDim] || PREBUILT_INSIGHTS.D1
   );
   const [isLoadingAI, setIsLoadingAI] = useState(false);
+
+  // Reset state whenever dimension changes
+  useEffect(() => {
+    setInsight(PREBUILT_INSIGHTS[currentDim] || PREBUILT_INSIGHTS.D1);
+    setHasViewedDetail(false);
+    setSecondsSpent(0);
+  }, [currentDim]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setSecondsSpent((s) => s + 1);
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [currentDim]);
 
   // Gọi Gemini API thời gian thực (fallback sẵn có nếu chưa có key hoặc mạng chậm)
   useEffect(() => {
@@ -43,11 +50,11 @@ export const Checkpoint: React.FC = () => {
           })
         });
         const data = await res.json();
-        if (isSubscribed && data.insight) {
+        if (isSubscribed && data.insight && data.insight.dimension === currentDim) {
           setInsight(data.insight);
         }
       } catch (err) {
-        console.warn('Fallback prebuilt insight used');
+        console.warn('Fallback prebuilt insight used for', currentDim);
       } finally {
         if (isSubscribed) setIsLoadingAI(false);
       }
@@ -55,7 +62,7 @@ export const Checkpoint: React.FC = () => {
 
     fetchAI();
     return () => { isSubscribed = false; };
-  }, [currentDim]);
+  }, [currentDim, responses]);
 
   const handleReadDetail = () => {
     setHasViewedDetail(true);

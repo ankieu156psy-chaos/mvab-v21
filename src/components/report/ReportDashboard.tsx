@@ -30,6 +30,38 @@ export const ReportDashboard: React.FC = () => {
   const [lookupCodeInput, setLookupCodeInput] = useState<string>('');
   const [lookupFeedback, setLookupFeedback] = useState<string | null>(null);
 
+  // Hòm thư góp ý
+  const [feedbackText, setFeedbackText] = useState<string>('');
+  const [feedbackContact, setFeedbackContact] = useState<string>('');
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState<boolean>(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
+
+  const handleSubmitFeedback = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!feedbackText.trim()) return;
+
+    setIsSubmittingFeedback(true);
+    try {
+      await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          participantCode: participantCode || 'ANONYMOUS',
+          feedbackText,
+          contactInfo: feedbackContact,
+          topCareer: careerClusters[0]?.name || ''
+        })
+      });
+      setFeedbackSubmitted(true);
+      setFeedbackText('');
+      setFeedbackContact('');
+    } catch {
+      setFeedbackSubmitted(true);
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
   // Tự động đồng bộ hóa kết quả về Google Sheets
   useEffect(() => {
     let isMounted = true;
@@ -647,6 +679,78 @@ export const ReportDashboard: React.FC = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* 8. Hòm Thư Góp Ý & Đóng Góp Cho Nghiên Cứu */}
+        <div className="bg-[#faf6ee]/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-stone-300 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-stone-200">
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded bg-[#8b2626] text-amber-50 flex items-center justify-center font-serif text-xs font-bold shadow-sm">
+                ✉
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-stone-900 font-sans">
+                  Hòm Thư Góp Ý & Đóng Góp Cho Nhóm Nghiên Cứu
+                </h3>
+                <span className="text-xs text-stone-500 font-sans">
+                  Ý kiến của bạn là nguồn dữ liệu quý giá giúp hoàn thiện thang đo MVAB
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-sans">
+            Bạn thấy câu hỏi nào còn gượng gạo, từ ngữ chưa tự nhiên, phân tích chưa khớp với trải nghiệm thực tế của bạn, hay có bất kỳ đề xuất nào cho đề tài chuẩn hóa? Nhóm rất trân trọng lắng nghe chia sẻ của bạn!
+          </p>
+
+          {feedbackSubmitted ? (
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm text-emerald-900 font-sans flex items-center justify-between gap-3 animate-fade-in">
+              <div className="flex items-center gap-2">
+                <span className="text-base">✓</span>
+                <span>Cảm ơn bạn rất nhiều! Ý kiến đóng góp quý báu của bạn đã được ghi nhận.</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFeedbackSubmitted(false)}
+                className="text-xs text-emerald-700 underline font-mono"
+              >
+                Gửi thêm góp ý khác
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmitFeedback} className="space-y-3">
+              <textarea
+                rows={3}
+                required
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+                placeholder="Nhập cảm nhận, câu hỏi thấy chưa ưng ý, hoặc đề xuất chân thành của bạn tại đây..."
+                className="w-full p-3.5 rounded-2xl border border-stone-300 bg-white/90 text-stone-900 text-xs sm:text-sm font-sans focus:outline-none focus:ring-2 focus:ring-[#8b2626] placeholder:text-stone-400"
+              />
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <input
+                  type="text"
+                  value={feedbackContact}
+                  onChange={(e) => setFeedbackContact(e.target.value)}
+                  placeholder="Email hoặc SĐT / Zalo (không bắt buộc, nếu bạn muốn thảo luận sâu hơn)"
+                  className="flex-1 py-2.5 px-4 rounded-xl border border-stone-300 bg-white/90 text-stone-900 text-xs font-sans focus:outline-none focus:ring-2 focus:ring-[#8b2626] placeholder:text-stone-400"
+                />
+
+                <button
+                  type="submit"
+                  disabled={isSubmittingFeedback || !feedbackText.trim()}
+                  className={`py-2.5 px-6 rounded-xl text-xs font-mono font-bold tracking-wider transition-all shadow-sm ${
+                    !feedbackText.trim() || isSubmittingFeedback
+                      ? 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                      : 'bg-[#8b2626] hover:bg-[#731f1f] text-amber-50 active:scale-95'
+                  }`}
+                >
+                  {isSubmittingFeedback ? 'Đang gửi...' : 'Gửi góp ý →'}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
 
         {/* Footer */}

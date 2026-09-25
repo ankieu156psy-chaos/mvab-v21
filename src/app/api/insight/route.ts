@@ -3,26 +3,37 @@ import { PREBUILT_INSIGHTS } from '@/lib/insights-prebuilt';
 import { Dimension } from '@/types';
 
 export async function POST(req: Request) {
+  let dimension: Dimension = 'D1';
+  let scores: Record<string, number> = {};
+
   try {
-    const { dimension, scores } = await req.json();
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    const fallback = PREBUILT_INSIGHTS[dimension as Dimension] || PREBUILT_INSIGHTS.D1;
-
-    // Nếu chưa cấu hình API Key, trả về bản Insight viết sẵn ngay lập tức
-    if (!apiKey) {
-      return NextResponse.json({
-        source: 'prebuilt',
-        insight: fallback
-      });
+    const body = await req.json();
+    if (body.dimension && PREBUILT_INSIGHTS[body.dimension as Dimension]) {
+      dimension = body.dimension as Dimension;
     }
+    scores = body.scores || {};
+  } catch (e) {
+    console.warn('[API_INSIGHT] Lỗi đọc body JSON, dùng D1 mặc định');
+  }
 
-    // Thiết lập timeout 3.5s để chống treo giao diện
+  const fallback = PREBUILT_INSIGHTS[dimension] || PREBUILT_INSIGHTS.D1;
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  // Nếu chưa cấu hình API Key, trả về bản Insight viết sẵn tương ứng với dimension
+  if (!apiKey) {
+    return NextResponse.json({
+      source: 'prebuilt',
+      insight: fallback
+    });
+  }
+
+  try {
+    // Thiết lập timeout 3s để chống treo giao diện
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
 
     const prompt = `Bạn là một nhà tâm lý học lâm sàng Việt Nam với 20 năm kinh nghiệm.
-Nhiệm vụ: Viết nhận xét ngắn (tối đa 2 câu) cho sinh viên vừa hoàn thành trục đánh giá tâm lý ${dimension}.
+Nhiệm vụ: Viết nhận xét ngắn (tối đa 2 câu) cho sinh viên vừa hoàn thành trục đánh giá tâm lý ${dimension} (${fallback.title}).
 Điểm số thô: ${JSON.stringify(scores)}.
 
 QUY TẮC BẮT BUỘC:
@@ -33,7 +44,7 @@ QUY TẮC BẮT BUỘC:
 5. Viết bằng tiếng Việt tinh tế, khoa học.`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -51,7 +62,7 @@ QUY TẮC BẮT BUỘC:
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.statusText}`);
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
@@ -61,15 +72,14 @@ QUY TẮC BẮT BUỘC:
       source: 'gemini',
       insight: {
         ...fallback,
+        dimension,
         teaser: generatedText || fallback.teaser
       }
     });
 
   } catch (error: any) {
-    console.warn('[GEMINI_FALLBACK] Chuyển sang fallback do:', error.message);
-    const { dimension } = await req.json().catch(() => ({ dimension: 'D1' }));
-    const fallback = PREBUILT_INSIGHTS[dimension as Dimension] || PREBUILT_INSIGHTS.D1;
-
+    console.warn(`[GEMINI_FALLBACK] Chuyển sang fallback cho ${dimension} do:`, error.message);
+    // Luôn luôn trả về fallback của đúng dimension được gửi lên
     return NextResponse.json({
       source: 'fallback',
       insight: fallback
