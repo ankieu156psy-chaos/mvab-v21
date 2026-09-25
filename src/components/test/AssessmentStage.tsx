@@ -1,15 +1,12 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTestStore, DIMENSIONS_ORDER } from '@/stores/test-store';
 import { ITEMS_DATA } from '@/lib/items';
 import { ProgressBar } from './ProgressBar';
 import { QuestionCard } from './QuestionCard';
 
 export const AssessmentStage: React.FC = () => {
-  // Select only primitive/stable state to avoid returning a fresh
-  // array from the selector on every render (which caused an infinite
-  // update loop via useSyncExternalStore).
   const currentDimIndex = useTestStore((s) => s.currentDimIndex);
   const responses = useTestStore((s) => s.responses);
   const answerQuestion = useTestStore((s) => s.answerQuestion);
@@ -30,19 +27,23 @@ export const AssessmentStage: React.FC = () => {
   );
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
-  // Scroll to top when dimension changes
+  // Focus on the first unanswered item whenever the dimension changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    const firstUnanswered = items.find((item) => responses[item.id] === undefined);
+    setActiveId(firstUnanswered?.id || items[0]?.id || null);
   }, [currentDim]);
 
   const handleAnswer = (itemId: string, value: number, index: number) => {
     answerQuestion(itemId, value);
 
-    // Auto-advance to next question smoothly after 300ms
+    // Auto-advance to next question smoothly after 280ms
     setTimeout(() => {
       if (index < items.length - 1) {
         const nextItem = items[index + 1];
+        setActiveId(nextItem.id);
         const nextEl = document.getElementById(`q-card-${nextItem.id}`);
         if (nextEl) {
           const offset = 80;
@@ -73,14 +74,19 @@ export const AssessmentStage: React.FC = () => {
 
       <main className="max-w-3xl mx-auto px-4 py-8">
         <div className="space-y-4">
-          {items.map((item, idx) => (
-            <QuestionCard
-              key={item.id}
-              item={item}
-              selectedValue={responses[item.id]}
-              onAnswer={(val) => handleAnswer(item.id, val, idx)}
-            />
-          ))}
+          {items.map((item, idx) => {
+            const isFocused = activeId ? item.id === activeId : idx === 0;
+            return (
+              <QuestionCard
+                key={item.id}
+                item={item}
+                selectedValue={responses[item.id]}
+                onAnswer={(val) => handleAnswer(item.id, val, idx)}
+                isFocused={isFocused}
+                onFocus={() => setActiveId(item.id)}
+              />
+            );
+          })}
         </div>
 
         {/* Bottom Finish Action */}
