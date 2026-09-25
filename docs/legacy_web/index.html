@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MVAB v2.1 — Khung Định Hướng Nghề Nghiệp & Đánh Giá Giám Sát Lâm Sàng Tâm Lý Học</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { background: white !important; color: black !important; }
+      .page-break { page-break-before: always; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl border-b border-indigo-900 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-500/30">
+          Ψ
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-bold tracking-tight">MVAB v2.1 Engine</h1>
+            <span class="bg-indigo-500/20 text-indigo-300 text-xs px-2.5 py-0.5 rounded-full border border-indigo-500/30 font-semibold">Publication-Grade</span>
+          </div>
+          <p class="text-xs text-slate-400">Multi-dimensional Vocational & Clinical Aptitude Battery (Việt Nam Localized)</p>
+        </div>
+      </div>
+      
+      <!-- Right actions -->
+      <div class="flex items-center gap-2 no-print">
+        <button id="btn-demo-menu" onclick="toggleDemoDropdown()" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 text-xs px-3 py-2 rounded-lg border border-slate-700 font-medium flex items-center gap-1.5 transition">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Điền Mẫu Test Nhanh ▾
+        </button>
+        <div id="demo-dropdown" class="hidden absolute right-4 top-16 mt-1 w-72 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-2 z-50 text-xs space-y-1">
+          <button onclick="fillDemoProfile('clinical')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition">
+            <div class="font-semibold text-indigo-400">1. Tâm lý Lâm sàng Y tế</div>
+            <div class="text-[11px] text-slate-400">Sẵn sàng viện 09 tháng, PT cao, PD thấp</div>
+          </button>
+          <button onclick="fillDemoProfile('ux_tech')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition">
+            <div class="font-semibold text-emerald-400">2. Công thái Nhận thức / UX & AI</div>
+            <div class="text-[11px] text-slate-400">Cao Data/Things, cao Tech, thích nghi cao</div>
+          </button>
+          <button onclick="fillDemoProfile('school')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition">
+            <div class="font-semibold text-amber-400">3. Tâm lý Học đường (TT 20)</div>
+            <div class="text-[11px] text-slate-400">Cao Meso/Micro, People cao, định danh V.07</div>
+          </button>
+          <button onclick="fillDemoProfile('burnout_risk')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 transition">
+            <div class="font-semibold text-rose-400">4. Hồ sơ Báo động Rủi ro</div>
+            <div class="text-[11px] text-slate-400">Kích hoạt bẫy IER, PD cực cao, cứu rỗi bệnh lý</div>
+          </button>
+        </div>
+        <button onclick="resetAssessment()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg border border-slate-700 font-medium transition">
+          Làm lại từ đầu
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Progress Card -->
+    <div id="progress-container" class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 mb-8 no-print">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Tiến trình đánh giá</span>
+          <h2 class="text-base font-bold text-slate-900" id="progress-status-text">Đang hoàn thành: 0 / 84 câu hỏi</h2>
+        </div>
+        <div class="text-right">
+          <span class="text-2xl font-black text-indigo-600" id="progress-percent">0%</span>
+        </div>
+      </div>
+      <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+        <div id="progress-bar-fill" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300 w-0"></div>
+      </div>
+    </div>
+
+    <!-- STAGE 1: BỘ LỌC TIỀN ĐỀ THỰC DỤNG GOTTFREDSON -->
+    <section id="section-gottfredson" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/80 mb-8">
+      <div class="border-b border-slate-100 pb-5 mb-6">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold mb-2">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Stage 1: Bộ Lọc Tiền Đề Thực Dụng (Gottfredson Feasibility)
+        </div>
+        <h2 class="text-xl font-bold text-slate-900">1. Điều Kiện Biên Thực Tế Đời Sống</h2>
+        <p class="text-sm text-slate-500 mt-1">
+          Theo lý thuyết Giới hạn & Thỏa hiệp (Linda Gottfredson), sự lựa chọn nghề nghiệp bền vững được định hình trước tiên bởi ranh giới tài chính, gia đình và cam kết pháp lý.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- PR1 -->
+        <div class="bg-slate-50/80 p-4 rounded-xl border border-slate-200/60">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            PR1: Kỳ vọng thu nhập tối thiểu 2 năm đầu sau tốt nghiệp
+          </label>
+          <select id="pr1" class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="low">Thấp (Chấp nhận thu nhập khởi điểm thấp để học việc / làm tình nguyện)</option>
+            <option value="medium" selected>Trung bình (Kỳ vọng mức lương đủ trang trải chi phí cơ bản)</option>
+            <option value="high">Cao (Bắt buộc phải có thu nhập tốt ngay để tự lập tài chính)</option>
+          </select>
+        </div>
+
+        <!-- PR2 -->
+        <div class="bg-slate-50/80 p-4 rounded-xl border border-slate-200/60">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            PR2: Khả năng chi trả học phí đào tạo nâng cao (ThS, Chuyên khoa)
+          </label>
+          <select id="pr2" class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="low">Hạn chế (Khó có thể chi trả học phí sau đại học nếu không có học bổng)</option>
+            <option value="medium" selected>Tự túc được mức vừa phải (Có thể vừa làm vừa học Thạc sĩ)</option>
+            <option value="high">Dồi dào (Gia đình hoặc bản thân sẵn sàng đầu tư toàn thời gian)</option>
+          </select>
+        </div>
+
+        <!-- PR3 -->
+        <div class="bg-slate-50/80 p-4 rounded-xl border border-slate-200/60">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            PR3: Nghĩa vụ phụng dưỡng gia đình có tính khẩn cấp
+          </label>
+          <select id="pr3" class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="low" selected>Không có áp lực lớn (Gia đình ổn định, có thể tự do phát triển)</option>
+            <option value="medium">Mức độ trung bình (Cần hỗ trợ gia đình một phần tài chính)</option>
+            <option value="high">Rất khẩn cấp (Phải có dòng tiền ổn định ngay để phụ giúp gia đình)</option>
+          </select>
+        </div>
+
+        <!-- PR4 -->
+        <div class="bg-slate-50/80 p-4 rounded-xl border border-slate-200/60">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            PR4: Khả năng chuyển dịch địa lý (Hà Nội, TP.HCM, Đà Nẵng)
+          </label>
+          <select id="pr4" class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="yes" selected>Rất thuận lợi (Đang sinh sống hoặc sẵn sàng lập nghiệp tại đô thị lớn)</option>
+            <option value="maybe">Cần cân nhắc (Tùy thuộc vào cơ hội việc làm cụ thể)</option>
+            <option value="no">Không thể di chuyển (Bắt buộc phải làm việc tại địa phương quê nhà)</option>
+          </select>
+        </div>
+
+        <!-- PR5 -->
+        <div class="bg-slate-50/80 p-4 rounded-xl border border-slate-200/60 md:col-span-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            PR5: Sẵn sàng cam kết thực hành 09 tháng tại bệnh viện (Luật KBCB 2023 & Nghị định 96/2023/NĐ-CP)
+          </label>
+          <select id="pr5" class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="yes" selected>Hoàn toàn sẵn sàng (Xác định mục tiêu trở thành Nhà tâm lý lâm sàng được cấp phép y tế)</option>
+            <option value="maybe">Cần xem xét lộ trình tài chính và thời gian</option>
+            <option value="no">Không có ý định thực hành trong môi trường bệnh viện khám chữa bệnh</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 2: BẢNG CÂU HỎI ĐO LƯỜNG 84 ITEMS -->
+    <section id="section-questions" class="space-y-6">
+      <!-- Dimensions Tabs -->
+      <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200/80 no-print flex gap-2 overflow-x-auto pb-3 text-xs font-semibold">
+        <button onclick="filterDimension('ALL')" class="dim-tab active px-3.5 py-2 rounded-xl bg-indigo-600 text-white transition whitespace-nowrap">Tất cả (84 câu)</button>
+        <button onclick="filterDimension('D1')" class="dim-tab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap">D1: Can thiệp (9)</button>
+        <button onclick="filterDimension('D2')" class="dim-tab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap">D2: Mơ hồ (6)</button>
+        <button onclick="filterDimension('D3')" class="dim-tab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap">D3: Triết lý (12)</button>
+        <button onclick="filterDimension('D4')" class="dim-tab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap">D4: Tác vụ (12)</button>
+        <button onclick="filterDimension('D5')" class="dim-tab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap">D5: Thấu cảm (8)</button>
+        <button onclick="filterDimension('D6')" class="dim-tab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap">D6: Tâm trí hóa (7)</button>
+        <button onclick="filterDimension('D7')" class="dim-tab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap">D7: Vị tha (10)</button>
+        <button onclick="filterDimension('D8')" class="dim-tab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap">D8: Phản hồi (16)</button>
+        <button onclick="filterDimension('IER')" class="dim-tab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap">IER (4)</button>
+      </div>
+
+      <!-- Questions List Container -->
+      <div id="questions-list" class="space-y-4">
+        <!-- Rendered by JavaScript -->
+      </div>
+
+      <!-- Submit Action Card -->
+      <div class="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 no-print">
+        <div>
+          <h3 class="text-xl font-bold">Hoàn Thành Bảng Câu Hỏi</h3>
+          <p class="text-sm text-indigo-200 mt-1">Hệ thống sẽ chạy Engine kiểm định IER, tính toán T-score trực giao và đối chiếu 9 quy tắc cấu hình.</p>
+        </div>
+        <button onclick="calculateResults()" class="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-400 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-indigo-500/30 transition transform active:scale-95 flex items-center justify-center gap-2">
+          <i data-lucide="bar-chart-3" class="w-5 h-5"></i> Xem Báo Cáo Phân Tích
+        </button>
+      </div>
+    </section>
+
+    <!-- STAGE 3: BÁO CÁO KẾT QUẢ TOÀN DIỆN (ẨN BAN ĐẦU) -->
+    <section id="section-results" class="hidden space-y-8 mt-12">
+      <!-- Title & Actions -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Báo cáo kết quả cá nhân hóa</span>
+          <h2 class="text-2xl font-black text-slate-900">Bản Đồ Định Hướng Nghề Nghiệp & An Toàn Giám Sát</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Tiêu chuẩn AERA/APA/NCME (2014) • Triệt tiêu Gộp Điểm Cưỡng bức (Zero Forced Aggregation)</p>
+        </div>
+        <div class="flex items-center gap-2 no-print">
+          <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 text-xs px-4 py-2.5 rounded-xl border border-slate-300 font-semibold shadow-sm transition flex items-center gap-1.5">
+            <i data-lucide="printer" class="w-4 h-4"></i> In Báo Cáo A4
+          </button>
+          <button onclick="exportJson()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs px-4 py-2.5 rounded-xl border border-indigo-200 font-semibold transition flex items-center gap-1.5">
+            <i data-lucide="download" class="w-4 h-4"></i> Tải Dữ Liệu JSON
+          </button>
+        </div>
+      </div>
+
+      <!-- 1. Data Integrity & IER Audit Badge -->
+      <div id="ier-audit-card" class="rounded-2xl p-6 border transition-all">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- 2. Dual Radar Charts & Score Breakdown -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Chart 1: Tier I Vocational Coordinates -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+          <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+            <div>
+              <span class="text-xs font-bold text-indigo-600 uppercase">Tầng I: Khớp Nối Nghề Nghiệp</span>
+              <h3 class="font-bold text-slate-900 text-base">Tọa Độ Sở Thích & Tác Vụ (D1 - D4)</h3>
+            </div>
+            <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-medium">T-score (M=50, SD=10)</span>
+          </div>
+          <div class="relative h-72 w-full flex items-center justify-center">
+            <canvas id="chart-tier1"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Tier II Clinical Supervisory Readiness -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+          <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+            <div>
+              <span class="text-xs font-bold text-purple-600 uppercase">Tầng II: An Toàn Giám Sát</span>
+              <h3 class="font-bold text-slate-900 text-base">Hồ Sơ Ranh Giới & Phản Hồi (D5 - D8)</h3>
+            </div>
+            <span class="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded font-medium">Formative Feedback</span>
+          </div>
+          <div class="relative h-72 w-full flex items-center justify-center">
+            <canvas id="chart-tier2"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Top Career Cluster Recommendations (9 Cụm Nghề Nghiệp Việt Nam) -->
+      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/80">
+        <div class="border-b border-slate-100 pb-4 mb-6">
+          <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Khớp nối nghề nghiệp thực tiễn</span>
+          <h3 class="text-xl font-bold text-slate-900">Xếp Hạng 9 Cụm Nghề Nghiệp Tâm Lý Học Tại Việt Nam</h3>
+          <p class="text-xs text-slate-500 mt-1">Căn cứ theo Luật Khám bệnh, chữa bệnh 2023, Thông tư 20/2023/TT-BGDĐT và Ma trận đối chiếu 54 Phân khu APA.</p>
+        </div>
+
+        <div id="clusters-ranking-container" class="space-y-4">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- 4. Configural Decision Rules Engine Results (9 Rules) -->
+      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/80">
+        <div class="border-b border-slate-100 pb-4 mb-6">
+          <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Engine tương tác phi tuyến tính</span>
+          <h3 class="text-xl font-bold text-slate-900">Kiểm Định 9 Quy Tắc Cấu Hình Tương Tác (Configural Rules)</h3>
+          <p class="text-xs text-slate-500 mt-1">Phát hiện các tương tác nhân cách vi mô, nguy cơ kiệt sức sớm và chỉ dẫn lộ trình giám sát lâm sàng IDM.</p>
+        </div>
+
+        <div id="configural-rules-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- 5. Formative Supervisory Readiness Synthesis (Tier II) -->
+      <div class="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-xl">
+        <div class="border-b border-slate-800 pb-4 mb-6">
+          <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Bản đồ tự chăm sóc & Giám sát lâm sàng</span>
+          <h3 class="text-xl font-bold text-white">Chỉ Dẫn Phát Triển Dành Cho Người Học & Giám Sát Viên</h3>
+          <p class="text-xs text-slate-400 mt-1">Nguyên tắc: Điểm Tầng II KHÔNG BAO GIỜ bị dùng để trừ điểm tiềm năng nghề nghiệp Tầng I.</p>
+        </div>
+
+        <div id="supervisory-synthesis-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 no-print mt-12">
+    <div class="max-w-7xl mx-auto px-4">
+      <p class="font-medium text-slate-700">MVAB v2.1 — Multi-dimensional Vocational & Clinical Aptitude Battery</p>
+      <p class="mt-1">Dự án Chuẩn hóa Công cụ Đánh giá Tâm lý Học đường & Hướng nghiệp Thực hành Việt Nam • 100% Zero Forced Aggregation</p>
+    </div>
+  </footer>
+
+  <!-- Application Logic & Data -->
+  <script>
+    // 84 Items Data
+    const ITEMS_DATA = [
+  {
+    "id": "D1_MIC_01",
+    "dim": "D1",
+    "subscale": "Định hướng Can thiệp Vi mô",
+    "text": "Tôi hứng thú nhất khi được đồng hành và giúp từng cá nhân tháo gỡ những mâu thuẫn nội tâm sâu sắc.",
+    "polarity": 1,
+    "stt": 1,
+    "maxScore": 5
+  },
+  {
+    "id": "D1_MIC_02",
+    "dim": "D1",
+    "subscale": "Định hướng Can thiệp Vi mô",
+    "text": "Tôi tin rằng sự chuyển biến bền vững của một người phải bắt đầu từ việc thấu hiểu những diễn biến tâm lý bên trong họ.",
+    "polarity": 1,
+    "stt": 2,
+    "maxScore": 5
+  },
+  {
+    "id": "D1_MIC_03",
+    "dim": "D1",
+    "subscale": "Định hướng Can thiệp Vi mô",
+    "text": "Tôi thấy công việc có ý nghĩa nhất khi được làm việc và hỗ trợ trực tiếp 1-1 với từng thân chủ.",
+    "polarity": 1,
+    "stt": 3,
+    "maxScore": 5
+  },
+  {
+    "id": "D1_MES_01",
+    "dim": "D1",
+    "subscale": "Định hướng Can thiệp Trung mô",
+    "text": "Tôi thích xây dựng và điều phối các chương trình tâm lý hướng tới một nhóm hoặc tập thể nhỏ.",
+    "polarity": 1,
+    "stt": 4,
+    "maxScore": 5
+  },
+  {
+    "id": "D1_MES_02",
+    "dim": "D1",
+    "subscale": "Định hướng Can thiệp Trung mô",
+    "text": "Tôi tràn đầy cảm hứng khi giúp cải thiện cách các thành viên trong một tập thể giao tiếp và phối hợp với nhau.",
+    "polarity": 1,
+    "stt": 5,
+    "maxScore": 5
+  },
+  {
+    "id": "D1_MES_03",
+    "dim": "D1",
+    "subscale": "Định hướng Can thiệp Trung mô",
+    "text": "Tôi tự tin vào khả năng dàn xếp và hòa giải những bất đồng giữa các thành viên trong một tập thể.",
+    "polarity": 1,
+    "stt": 6,
+    "maxScore": 5
+  },
+  {
+    "id": "D1_MAC_01",
+    "dim": "D1",
+    "subscale": "Định hướng Can thiệp Vĩ mô",
+    "text": "Tôi muốn hướng sự nghiệp của mình vào việc xây dựng và cải thiện các chính sách sức khỏe tâm thần ở tầm quốc gia.",
+    "polarity": 1,
+    "stt": 7,
+    "maxScore": 5
+  },
+  {
+    "id": "D1_MAC_02",
+    "dim": "D1",
+    "subscale": "Định hướng Can thiệp Vĩ mô",
+    "text": "Tôi tin rằng cách tạo ra thay đổi xã hội sâu rộng nhất là thúc đẩy hoàn thiện các quy định và chính sách công.",
+    "polarity": 1,
+    "stt": 8,
+    "maxScore": 5
+  },
+  {
+    "id": "D1_MAC_03",
+    "dim": "D1",
+    "subscale": "Định hướng Can thiệp Vĩ mô",
+    "text": "Phần lớn các bất ổn tâm lý của cá nhân bắt nguồn sâu xa từ những bất công và định kiến trong xã hội.",
+    "polarity": 1,
+    "stt": 9,
+    "maxScore": 5
+  },
+  {
+    "id": "D2_AMB_01",
+    "dim": "D2",
+    "subscale": "Không chấp nhận tính mơ hồ",
+    "text": "Tôi cảm thấy bứt rứt, khó chịu khi phải xử lý một vấn đề chuyên môn không có câu trả lời rõ ràng.",
+    "polarity": -1,
+    "stt": 10,
+    "maxScore": 5
+  },
+  {
+    "id": "D2_AMB_02",
+    "dim": "D2",
+    "subscale": "Nhu cầu cấu trúc rõ ràng",
+    "text": "Tôi làm việc an tâm và hiệu quả nhất khi được tuân theo những quy trình nghiệp vụ đã được chuẩn hóa.",
+    "polarity": -1,
+    "stt": 11,
+    "maxScore": 5
+  },
+  {
+    "id": "D2_AMB_03",
+    "dim": "D2",
+    "subscale": "Đón nhận sự mới lạ & linh hoạt",
+    "text": "Những tình huống bất ngờ chưa từng có tiền lệ mang lại cho tôi sự hào hứng khám phá thay vì cảm giác lo sợ.",
+    "polarity": 1,
+    "stt": 12,
+    "maxScore": 5
+  },
+  {
+    "id": "D2_AMB_04",
+    "dim": "D2",
+    "subscale": "Không chấp nhận tính mơ hồ",
+    "text": "Tôi rất lúng túng khi phải thực hiện công việc mà không có hướng dẫn từng bước rõ ràng.",
+    "polarity": -1,
+    "stt": 13,
+    "maxScore": 5
+  },
+  {
+    "id": "D2_AMB_05",
+    "dim": "D2",
+    "subscale": "Đón nhận sự mới lạ & linh hoạt",
+    "text": "Tôi nhanh chóng thích nghi và giữ được sự vững vàng ngay cả khi môi trường làm việc thay đổi liên tục.",
+    "polarity": 1,
+    "stt": 14,
+    "maxScore": 5
+  },
+  {
+    "id": "D2_AMB_06",
+    "dim": "D2",
+    "subscale": "Đón nhận sự mới lạ & linh hoạt",
+    "text": "Việc không thể biết trước kết quả cuối cùng chính là điều khiến quá trình nghiên cứu trở nên đầy cuốn hút.",
+    "polarity": 1,
+    "stt": 15,
+    "maxScore": 5
+  },
+  {
+    "id": "D3_EMP_01",
+    "dim": "D3",
+    "subscale": "Hướng Thực chứng & Bằng chứng",
+    "text": "Một can thiệp tâm lý chỉ thực sự đáng tin cậy khi hiệu quả của nó được chứng minh bằng các bằng chứng thực nghiệm rõ ràng.",
+    "polarity": 1,
+    "stt": 16,
+    "maxScore": 5
+  },
+  {
+    "id": "D3_EMP_02",
+    "dim": "D3",
+    "subscale": "Hướng Thực chứng & Bằng chứng",
+    "text": "Việc lượng giá triệu chứng và theo dõi tiến trình can thiệp bằng các con số cụ thể là yếu tố bắt buộc trong nghề.",
+    "polarity": 1,
+    "stt": 17,
+    "maxScore": 5
+  },
+  {
+    "id": "D3_EMP_03",
+    "dim": "D3",
+    "subscale": "Hướng Thực chứng & Bằng chứng",
+    "text": "Phương pháp trợ giúp tâm lý hiệu quả nhất là giúp thân chủ nhận diện và thay đổi những niềm tin sai lệch của họ.",
+    "polarity": 1,
+    "stt": 18,
+    "maxScore": 5
+  },
+  {
+    "id": "D3_EMP_04",
+    "dim": "D3",
+    "subscale": "Hướng Thực chứng & Bằng chứng",
+    "text": "Hiểu rõ các cơ chế sinh học não bộ là chìa khóa then chốt để giải thích và can thiệp các rối loạn tâm thần.",
+    "polarity": 1,
+    "stt": 19,
+    "maxScore": 5
+  },
+  {
+    "id": "D3_REL_01",
+    "dim": "D3",
+    "subscale": "Hướng Trải nghiệm & Mối quan hệ",
+    "text": "Mối quan hệ đồng cảm và chân thực giữa nhà chuyên môn với thân chủ chính là yếu tố chữa lành quan trọng nhất.",
+    "polarity": 1,
+    "stt": 20,
+    "maxScore": 5
+  },
+  {
+    "id": "D3_REL_02",
+    "dim": "D3",
+    "subscale": "Hướng Trải nghiệm & Mối quan hệ",
+    "text": "Muốn thân chủ chuyển biến sâu sắc, nhà chuyên môn nhất thiết phải giúp họ đối diện với những trải nghiệm đau thương trong quá khứ.",
+    "polarity": 1,
+    "stt": 21,
+    "maxScore": 5
+  },
+  {
+    "id": "D3_REL_03",
+    "dim": "D3",
+    "subscale": "Hướng Trải nghiệm & Mối quan hệ",
+    "text": "Bất ổn của một người chỉ có thể hiểu thấu đáo khi đặt trong mối tương quan với cả gia đình và môi trường sống của họ.",
+    "polarity": 1,
+    "stt": 22,
+    "maxScore": 5
+  },
+  {
+    "id": "D3_REL_04",
+    "dim": "D3",
+    "subscale": "Hướng Trải nghiệm & Mối quan hệ",
+    "text": "Mục tiêu cao nhất của trợ giúp tâm lý là giúp con người học cách chấp nhận và sống an yên cùng những cảm xúc khó khăn.",
+    "polarity": 1,
+    "stt": 23,
+    "maxScore": 5
+  },
+  {
+    "id": "D3_TEC_01",
+    "dim": "D3",
+    "subscale": "Hướng Công nghệ & Trị liệu số",
+    "text": "Tôi hào hứng với việc ứng dụng công nghệ số và các ứng dụng thông minh để phổ cập các dịch vụ chăm sóc sức khỏe tâm thần.",
+    "polarity": 1,
+    "stt": 24,
+    "maxScore": 5
+  },
+  {
+    "id": "D3_TEC_02",
+    "dim": "D3",
+    "subscale": "Hướng Công nghệ & Trị liệu số",
+    "text": "Các thiết bị phản hồi sinh học và công nghệ theo dõi tín hiệu não bộ mở ra những hướng đi đầy triển vọng cho ngành tâm lý.",
+    "polarity": 1,
+    "stt": 25,
+    "maxScore": 5
+  },
+  {
+    "id": "D3_TEC_03",
+    "dim": "D3",
+    "subscale": "Hướng Công nghệ & Trị liệu số",
+    "text": "Tôi tin rằng các thuật toán phân tích hành vi và trí tuệ nhân tạo có thể hỗ trợ đắc lực cho việc cá nhân hóa phác đồ can thiệp.",
+    "polarity": 1,
+    "stt": 26,
+    "maxScore": 5
+  },
+  {
+    "id": "D3_TEC_04",
+    "dim": "D3",
+    "subscale": "Hướng Công nghệ & Trị liệu số",
+    "text": "Việc nghiên cứu và thiết kế các phần mềm trắc nghiệm tâm lý tự động mang lại cho tôi niềm say mê học thuật lớn.",
+    "polarity": 1,
+    "stt": 27,
+    "maxScore": 5
+  },
+  {
+    "id": "D4_PEO_01",
+    "dim": "D4",
+    "subscale": "Tác vụ Con người & Xã hội",
+    "text": "Tôi tìm thấy niềm say mê lớn trong những công việc đòi hỏi phải lắng nghe và thấu hiểu con người.",
+    "polarity": 1,
+    "stt": 28,
+    "maxScore": 5
+  },
+  {
+    "id": "D4_PEO_02",
+    "dim": "D4",
+    "subscale": "Tác vụ Con người & Xã hội",
+    "text": "Việc hướng dẫn và bồi dưỡng người khác tiến bộ mang lại cho tôi sự hào hứng lớn.",
+    "polarity": 1,
+    "stt": 29,
+    "maxScore": 5
+  },
+  {
+    "id": "D4_PEO_03",
+    "dim": "D4",
+    "subscale": "Tác vụ Con người & Xã hội",
+    "text": "Tôi luôn muốn làm việc trong một môi trường mà sự gắn kết giữa con người là ưu tiên hàng đầu.",
+    "polarity": 1,
+    "stt": 30,
+    "maxScore": 5
+  },
+  {
+    "id": "D4_PEO_04",
+    "dim": "D4",
+    "subscale": "Tác vụ Con người & Xã hội",
+    "text": "Tôi có trực giác nhạy bén trong việc nhận biết trạng thái cảm xúc của những người xung quanh.",
+    "polarity": 1,
+    "stt": 31,
+    "maxScore": 5
+  },
+  {
+    "id": "D4_PEO_05",
+    "dim": "D4",
+    "subscale": "Tác vụ Con người & Xã hội",
+    "text": "Tôi nhanh chóng cạn kiệt năng lượng nếu phải liên tục trò chuyện với người khác suốt cả ngày.",
+    "polarity": -1,
+    "stt": 32,
+    "maxScore": 5
+  },
+  {
+    "id": "D4_PEO_06",
+    "dim": "D4",
+    "subscale": "Tác vụ Con người & Xã hội",
+    "text": "Tôi luôn sẵn lòng dành thời gian để an ủi và động viên khi một ai đó gặp chuyện buồn phiền.",
+    "polarity": 1,
+    "stt": 33,
+    "maxScore": 5
+  },
+  {
+    "id": "D4_THI_01",
+    "dim": "D4",
+    "subscale": "Tác vụ Đồ vật & Kỹ thuật",
+    "text": "Tôi thích làm việc trực tiếp với các thiết bị kỹ thuật hoặc máy móc cụ thể.",
+    "polarity": 1,
+    "stt": 34,
+    "maxScore": 5
+  },
+  {
+    "id": "D4_THI_02",
+    "dim": "D4",
+    "subscale": "Tác vụ Đồ vật & Kỹ thuật",
+    "text": "Tôi tìm thấy sự hào hứng khi tìm hiểu cơ chế hoạt động và sửa chữa các đồ dùng hư hỏng.",
+    "polarity": 1,
+    "stt": 35,
+    "maxScore": 5
+  },
+  {
+    "id": "D4_THI_03",
+    "dim": "D4",
+    "subscale": "Tác vụ Đồ vật & Kỹ thuật",
+    "text": "Tôi thích tự tay lắp ráp hoặc xây dựng các mô hình kỹ thuật cụ thể.",
+    "polarity": 1,
+    "stt": 36,
+    "maxScore": 5
+  },
+  {
+    "id": "D4_DAT_01",
+    "dim": "D4",
+    "subscale": "Tác vụ Dữ liệu & Thống kê",
+    "text": "Tôi rất thích đào sâu phân tích các bộ dữ liệu thống kê phức tạp.",
+    "polarity": 1,
+    "stt": 37,
+    "maxScore": 5
+  },
+  {
+    "id": "D4_DAT_02",
+    "dim": "D4",
+    "subscale": "Tác vụ Dữ liệu & Thống kê",
+    "text": "Xử lý các bảng số liệu và biểu đồ khiến tôi thấy cuốn hút hơn là việc trò chuyện xã giao.",
+    "polarity": 1,
+    "stt": 38,
+    "maxScore": 5
+  },
+  {
+    "id": "D4_DAT_03",
+    "dim": "D4",
+    "subscale": "Tác vụ Dữ liệu & Thống kê",
+    "text": "Tôi hứng thú với việc xây dựng các công thức hoặc thuật toán để phân loại dữ liệu có cấu trúc.",
+    "polarity": 1,
+    "stt": 39,
+    "maxScore": 5
+  },
+  {
+    "id": "D5_PT_01",
+    "dim": "D5",
+    "subscale": "Lấy góc nhìn / Thấu cảm nhận thức",
+    "text": "Tôi luôn chủ động đặt mình vào hoàn cảnh của người khác trước khi đưa ra phán xét.",
+    "polarity": 1,
+    "stt": 40,
+    "maxScore": 5
+  },
+  {
+    "id": "D5_PT_02",
+    "dim": "D5",
+    "subscale": "Lấy góc nhìn / Thấu cảm nhận thức",
+    "text": "Khi xảy ra bất đồng quan điểm, tôi luôn nỗ lực nhìn nhận vấn đề từ góc độ của đối phương.",
+    "polarity": 1,
+    "stt": 41,
+    "maxScore": 5
+  },
+  {
+    "id": "D5_PT_03",
+    "dim": "D5",
+    "subscale": "Lấy góc nhìn / Thấu cảm nhận thức",
+    "text": "Khi xảy ra tranh cãi, tôi luôn lắng nghe và cân nhắc thấu đáo quan điểm của các bên.",
+    "polarity": 1,
+    "stt": 42,
+    "maxScore": 5
+  },
+  {
+    "id": "D5_PT_04",
+    "dim": "D5",
+    "subscale": "Lấy góc nhìn / Thấu cảm nhận thức",
+    "text": "Tôi ít khi bận tâm suy nghĩ xem người khác đang nhìn nhận sự việc ra sao.",
+    "polarity": -1,
+    "stt": 43,
+    "maxScore": 5
+  },
+  {
+    "id": "D5_PD_01",
+    "dim": "D5",
+    "subscale": "Đau buồn cá nhân / Ngập lụt cảm xúc",
+    "text": "Khi chứng kiến ai đó rơi vào cơn hoảng loạn, tôi cảm thấy bàng hoàng và mất phương hướng.",
+    "polarity": 1,
+    "stt": 44,
+    "maxScore": 5
+  },
+  {
+    "id": "D5_PD_02",
+    "dim": "D5",
+    "subscale": "Đau buồn cá nhân / Ngập lụt cảm xúc",
+    "text": "Tôi rất dễ bị ngợp cảm xúc khi nhìn thấy nỗi đau đớn tột cùng của người khác.",
+    "polarity": 1,
+    "stt": 45,
+    "maxScore": 5
+  },
+  {
+    "id": "D5_PD_03",
+    "dim": "D5",
+    "subscale": "Đau buồn cá nhân / Ngập lụt cảm xúc",
+    "text": "Tôi vẫn giữ được sự bình tĩnh và làm chủ bản thân khi đối mặt với một tình huống khẩn cấp.",
+    "polarity": -1,
+    "stt": 46,
+    "maxScore": 5
+  },
+  {
+    "id": "D5_PD_04",
+    "dim": "D5",
+    "subscale": "Đau buồn cá nhân / Ngập lụt cảm xúc",
+    "text": "Việc chứng kiến người khác khóc nức nở khiến tôi bối rối và chỉ muốn né tránh.",
+    "polarity": 1,
+    "stt": 47,
+    "maxScore": 5
+  },
+  {
+    "id": "D6_RFQ_01",
+    "dim": "D6",
+    "subscale": "Độ chắc chắn tâm trí hóa",
+    "text": "Tôi luôn tò mò về những động cơ tâm lý tiềm ẩn đằng sau hành vi của người khác.",
+    "polarity": 1,
+    "stt": 48,
+    "maxScore": 5
+  },
+  {
+    "id": "D6_RFQ_02",
+    "dim": "D6",
+    "subscale": "Tính không chắc chắn tâm trí",
+    "text": "Tôi thường gặp khó khăn trong việc gọi tên chính xác trạng thái cảm xúc của bản thân.",
+    "polarity": -1,
+    "stt": 49,
+    "maxScore": 5
+  },
+  {
+    "id": "D6_RFQ_03",
+    "dim": "D6",
+    "subscale": "Độ chắc chắn tâm trí hóa",
+    "text": "Tôi ý thức rằng những cảm xúc bộc phát nhất thời hoàn toàn có thể bóp méo cái nhìn của ta về sự thật.",
+    "polarity": 1,
+    "stt": 50,
+    "maxScore": 5
+  },
+  {
+    "id": "D6_RFQ_04",
+    "dim": "D6",
+    "subscale": "Tính không chắc chắn tâm trí",
+    "text": "Tôi thường cảm thấy khó hiểu trước cách hành xử của những người xung quanh.",
+    "polarity": -1,
+    "stt": 51,
+    "maxScore": 5
+  },
+  {
+    "id": "D6_RFQ_05",
+    "dim": "D6",
+    "subscale": "Độ chắc chắn tâm trí hóa",
+    "text": "Tôi luôn ý thức rằng những suy nghĩ trong đầu mình không nhất thiết là sự thật khách quan.",
+    "polarity": 1,
+    "stt": 52,
+    "maxScore": 5
+  },
+  {
+    "id": "D6_RFQ_06",
+    "dim": "D6",
+    "subscale": "Tính không chắc chắn tâm trí",
+    "text": "Tôi cảm thấy việc thấu hiểu nội tâm người khác là điều vượt quá khả năng của mình.",
+    "polarity": -1,
+    "stt": 53,
+    "maxScore": 5
+  },
+  {
+    "id": "D6_RFQ_07",
+    "dim": "D6",
+    "subscale": "Độ chắc chắn tâm trí hóa",
+    "text": "Tôi luôn nhìn nhận rằng hành vi của mỗi người đều ẩn chứa nhiều động cơ nội tâm phức tạp.",
+    "polarity": 1,
+    "stt": 54,
+    "maxScore": 5
+  },
+  {
+    "id": "D7_HEA_01",
+    "dim": "D7",
+    "subscale": "Vị tha lành mạnh có ranh giới",
+    "text": "Tôi chủ động thiết lập những ranh giới rõ ràng để bảo vệ năng lượng cá nhân khi hỗ trợ người khác.",
+    "polarity": 1,
+    "stt": 55,
+    "maxScore": 5
+  },
+  {
+    "id": "D7_HEA_02",
+    "dim": "D7",
+    "subscale": "Vị tha lành mạnh có ranh giới",
+    "text": "Tôi có thể thoải mái nói lời từ chối trước những đòi hỏi vượt quá giới hạn của mình mà không hề cảm thấy áy náy.",
+    "polarity": 1,
+    "stt": 56,
+    "maxScore": 5
+  },
+  {
+    "id": "D7_HEA_03",
+    "dim": "D7",
+    "subscale": "Vị tha lành mạnh có ranh giới",
+    "text": "Tôi coi việc chăm sóc sức khỏe của bản thân là điều kiện tiên quyết để có thể giúp đỡ người khác lâu dài.",
+    "polarity": 1,
+    "stt": 57,
+    "maxScore": 5
+  },
+  {
+    "id": "D7_HEA_04",
+    "dim": "D7",
+    "subscale": "Vị tha lành mạnh có ranh giới",
+    "text": "Tôi ưu tiên việc đồng hành để thân chủ tự tìm giải pháp hơn là đứng ra giải quyết thay cho họ.",
+    "polarity": 1,
+    "stt": 58,
+    "maxScore": 5
+  },
+  {
+    "id": "D7_HEA_05",
+    "dim": "D7",
+    "subscale": "Vị tha lành mạnh có ranh giới",
+    "text": "Sự bình yên nội tâm của tôi không bị lung lay ngay cả khi người khác tỏ ý thất vọng vì không được tôi giúp đỡ.",
+    "polarity": 1,
+    "stt": 59,
+    "maxScore": 5
+  },
+  {
+    "id": "D7_SAC_01",
+    "dim": "D7",
+    "subscale": "Vị tha cực đoan hy sinh bản thân",
+    "text": "Tôi luôn đặt mong muốn và sự an toàn của người khác lên trên nhu cầu cơ bản của chính mình.",
+    "polarity": 1,
+    "stt": 60,
+    "maxScore": 5
+  },
+  {
+    "id": "D7_SAC_02",
+    "dim": "D7",
+    "subscale": "Vị tha cực đoan hy sinh bản thân",
+    "text": "Tôi thấy mình không thể từ chối khi có người nhờ giúp đỡ, dù bản thân đã hoàn toàn kiệt sức.",
+    "polarity": 1,
+    "stt": 61,
+    "maxScore": 5
+  },
+  {
+    "id": "D7_SAC_03",
+    "dim": "D7",
+    "subscale": "Vị tha cực đoan hy sinh bản thân",
+    "text": "Cảm nhận về giá trị bản thân của tôi gắn chặt với việc tôi có thể giải cứu và giúp đỡ người khác.",
+    "polarity": 1,
+    "stt": 62,
+    "maxScore": 5
+  },
+  {
+    "id": "D7_SAC_04",
+    "dim": "D7",
+    "subscale": "Vị tha cực đoan hy sinh bản thân",
+    "text": "Tôi cảm thấy áy náy tội lỗi nếu dành thời gian nghỉ ngơi cho riêng mình trong khi người khác đang gặp khó khăn.",
+    "polarity": 1,
+    "stt": 63,
+    "maxScore": 5
+  },
+  {
+    "id": "D7_SAC_05",
+    "dim": "D7",
+    "subscale": "Vị tha cực đoan hy sinh bản thân",
+    "text": "Tôi luôn vô thức gánh lấy những nỗi khổ tâm của người khác như thể đó là trách nhiệm của chính mình.",
+    "polarity": 1,
+    "stt": 64,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FUT_01",
+    "dim": "D8",
+    "subscale": "Cảm nhận giá trị hữu ích của phản hồi",
+    "text": "Những nhận xét chuyên môn từ người hướng dẫn là nguồn lực quan trọng nhất giúp tôi nâng cao năng lực.",
+    "polarity": 1,
+    "stt": 65,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FUT_02",
+    "dim": "D8",
+    "subscale": "Cảm nhận giá trị hữu ích của phản hồi",
+    "text": "Tôi luôn chủ động tìm kiếm những ý kiến đóng góp thẳng thắn để cải thiện kỹ năng chuyên môn.",
+    "polarity": 1,
+    "stt": 66,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FUT_03",
+    "dim": "D8",
+    "subscale": "Cảm nhận giá trị hữu ích của phản hồi",
+    "text": "Góp ý từ người hướng dẫn giúp tôi nhìn ra những lỗ hổng nghiệp vụ mà bản thân không tự nhận thấy.",
+    "polarity": 1,
+    "stt": 67,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FUT_04",
+    "dim": "D8",
+    "subscale": "Cảm nhận giá trị hữu ích của phản hồi",
+    "text": "Tôi xem những lời chê trách về kỹ năng chuyên môn là bài học quý giá thay vì cảm giác bị công kích.",
+    "polarity": 1,
+    "stt": 68,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FUT_05",
+    "dim": "D8",
+    "subscale": "Cảm nhận giá trị hữu ích của phản hồi",
+    "text": "Tôi thấy những buổi nhận xét và đánh giá chuyên môn ít khi mang lại giá trị thực tế.",
+    "polarity": -1,
+    "stt": 69,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FSE_01",
+    "dim": "D8",
+    "subscale": "Niềm tin năng lực tự thích ứng",
+    "text": "Tôi tự tin vào khả năng chuyển hóa những lời nhận xét thành kế hoạch hành động cụ thể.",
+    "polarity": 1,
+    "stt": 70,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FSE_02",
+    "dim": "D8",
+    "subscale": "Niềm tin năng lực tự thích ứng",
+    "text": "Ngay cả khi nhận được những lời khuyên chung chung, tôi vẫn biết cách cụ thể hóa chúng thành các bước rèn luyện.",
+    "polarity": 1,
+    "stt": 71,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FSE_03",
+    "dim": "D8",
+    "subscale": "Niềm tin năng lực tự thích ứng",
+    "text": "Tôi có đủ sự vững vàng để tiếp nhận những lời chê bai thẳng thắn mà không bị nản lòng.",
+    "polarity": 1,
+    "stt": 72,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FSE_04",
+    "dim": "D8",
+    "subscale": "Niềm tin năng lực tự thích ứng",
+    "text": "Khi bị chỉ ra quá nhiều lỗi sai cùng lúc, tôi thường bị choáng ngợp và không biết phải bắt đầu sửa từ đâu.",
+    "polarity": -1,
+    "stt": 73,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FSE_05",
+    "dim": "D8",
+    "subscale": "Niềm tin năng lực tự thích ứng",
+    "text": "Tôi có cách tự giải tỏa tâm lý để lấy lại tinh thần nhanh chóng sau một buổi đánh giá căng thẳng.",
+    "polarity": 1,
+    "stt": 74,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FDE_01",
+    "dim": "D8",
+    "subscale": "Kháng cự phòng vệ / Tự ái",
+    "text": "Khi bị chỉ trích, phản xạ đầu tiên của tôi là tìm lý do để thanh minh cho bản thân.",
+    "polarity": 1,
+    "stt": 75,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FDE_02",
+    "dim": "D8",
+    "subscale": "Kháng cự phòng vệ / Tự ái",
+    "text": "Lòng tự ái của tôi bị tổn thương sâu sắc mỗi khi có người vạch ra những sai sót trong công việc của mình.",
+    "polarity": 1,
+    "stt": 76,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FDE_03",
+    "dim": "D8",
+    "subscale": "Kháng cự phòng vệ / Tự ái",
+    "text": "Tôi hiếm khi cảm thấy lòng tự trọng bị đe dọa trước những nhận xét về năng lực của mình.",
+    "polarity": -1,
+    "stt": 77,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FDE_04",
+    "dim": "D8",
+    "subscale": "Kháng cự phòng vệ / Tự ái",
+    "text": "Việc giữ gìn hình ảnh hoàn hảo quan trọng hơn việc phải thừa nhận lỗi sai trước mặt người khác.",
+    "polarity": 1,
+    "stt": 78,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FDE_05",
+    "dim": "D8",
+    "subscale": "Kháng cự phòng vệ / Tự ái",
+    "text": "Tôi thường cảm thấy ấm ức ngầm mỗi khi bị người hướng dẫn bắt lỗi và yêu cầu chỉnh sửa lại.",
+    "polarity": 1,
+    "stt": 79,
+    "maxScore": 5
+  },
+  {
+    "id": "D8_FDE_06",
+    "dim": "D8",
+    "subscale": "Kháng cự phòng vệ / Tự ái",
+    "text": "Khi bị người khác chê bai, phản ứng đầu tiên của tôi là nghi ngờ năng lực chuyên môn của họ.",
+    "polarity": 1,
+    "stt": 80,
+    "maxScore": 5
+  },
+  {
+    "id": "IER_DIR_01",
+    "dim": "IER",
+    "subscale": "Directed Response Item",
+    "text": "Để đảm bảo hệ thống ghi nhận đúng dữ liệu, xin vui lòng chọn \"Hoàn toàn không đồng ý\" cho câu này.",
+    "polarity": 1,
+    "stt": 81,
+    "maxScore": 5
+  },
+  {
+    "id": "IER_DIR_02",
+    "dim": "IER",
+    "subscale": "Directed Response Item",
+    "text": "Xin hãy chọn đáp án \"Đồng ý\" (điểm 4) để xác nhận bạn đang đọc kỹ nội dung câu hỏi.",
+    "polarity": 1,
+    "stt": 82,
+    "maxScore": 5
+  },
+  {
+    "id": "IER_INC_01a",
+    "dim": "IER",
+    "subscale": "Inconsistency Pair A",
+    "text": "Tôi cảm thấy hứng thú và tràn đầy năng lượng khi làm việc trong một môi trường biến đổi liên tục.",
+    "polarity": 1,
+    "stt": 83,
+    "maxScore": 5
+  },
+  {
+    "id": "IER_INC_01b",
+    "dim": "IER",
+    "subscale": "Inconsistency Pair B",
+    "text": "Sự thay đổi và tính bất định liên tục trong môi trường làm việc khiến tôi hoàn toàn chán nản.",
+    "polarity": 1,
+    "stt": 84,
+    "maxScore": 5
+  }
+];
+
+    // State
+    const userResponses = {};
+    let currentFilter = 'ALL';
+    let chartTier1Instance = null;
+    let chartTier2Instance = null;
+
+    // Initialize UI
+    window.addEventListener('DOMContentLoaded', () => {
+      renderQuestions();
+      updateProgressBar();
+      lucide.createIcons();
+    });
+
+    function toggleDemoDropdown() {
+      const dd = document.getElementById('demo-dropdown');
+      dd.classList.toggle('hidden');
+    }
+
+    // Filter questions by dimension
+    function filterDimension(dim) {
+      currentFilter = dim;
+      document.querySelectorAll('.dim-tab').forEach(b => {
+        b.classList.remove('bg-indigo-600', 'text-white');
+        b.classList.add('bg-slate-100', 'text-slate-600');
+      });
+      event.target.classList.add('bg-indigo-600', 'text-white');
+      event.target.classList.remove('bg-slate-100', 'text-slate-600');
+      renderQuestions();
+    }
+
+    // Render questions list
+    function renderQuestions() {
+      const container = document.getElementById('questions-list');
+      container.innerHTML = '';
+
+      const filtered = ITEMS_DATA.filter(item => {
+        if (currentFilter === 'ALL') return true;
+        if (currentFilter === 'IER') return item.dim === 'IER';
+        return item.dim === currentFilter;
+      });
+
+      filtered.forEach((item, idx) => {
+        const isAnswered = userResponses[item.id] !== undefined;
+        const currentVal = userResponses[item.id];
+
+        const card = document.createElement('div');
+        card.className = `p-4 sm:p-5 rounded-2xl border transition-all duration-200 ${
+          isAnswered ? 'bg-white border-slate-200 shadow-sm' : 'bg-white/70 border-slate-200/60'
+        }`;
+        card.id = `q-card-${item.id}`;
+
+        let optionsHtml = '';
+        const maxPts = item.maxScore;
+        
+        for (let pt = 1; pt <= maxPts; pt++) {
+          const isSelected = currentVal === pt;
+          let labelText = pt.toString();
+          if (maxPts === 5) {
+            if (pt === 1) labelText = '1 - Rất không đồng ý';
+            if (pt === 2) labelText = '2 - Không đồng ý';
+            if (pt === 3) labelText = '3 - Phân vân';
+            if (pt === 4) labelText = '4 - Đồng ý';
+            if (pt === 5) labelText = '5 - Rất đồng ý';
+          } else {
+            if (pt === 1) labelText = '1 - Hoàn toàn không';
+            if (pt === 4) labelText = '4 - Trung lập';
+            if (pt === 7) labelText = '7 - Hoàn toàn đúng';
+          }
+
+          
+          optionsHtml += `
+            <button onclick="selectOption('${item.id}', ${pt}, event)" 
+ 
+              class="flex-1 py-2 sm:py-2.5 px-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all duration-150 ${
+                isSelected 
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20' 
+                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+              }">
+              ${pt}
+            </button>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-4 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                item.dim === 'IER' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'
+              }">#${item.stt.toString().padStart(2, '0')} • ${item.id}</span>
+              <span class="text-xs text-slate-400 font-medium">${item.subscale}</span>
+            </div>
+            ${isAnswered ? '<span class="text-xs text-emerald-600 font-bold flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Đã chọn</span>' : '<span class="text-xs text-slate-400">Chưa trả lời</span>'}
+          </div>
+          <p class="text-sm sm:text-base font-semibold text-slate-800 mb-4 leading-relaxed">${item.text}</p>
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            ${optionsHtml}
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-400 mt-2 px-1">
+            <span>Hoàn toàn không đồng ý</span>
+            <span>Hoàn toàn đồng ý</span>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Select option handler
+    
+    function selectOption(itemId, val, event) {
+      userResponses[itemId] = val;
+      localStorage.setItem('mvab_responses', JSON.stringify(userResponses));
+      updateProgressBar();
+      
+      // Update DOM classes instead of re-rendering everything
+      const card = document.getElementById(`q-card-${itemId}`);
+      if(card) {
+        card.classList.remove('bg-white/70', 'border-slate-200/60');
+        card.classList.add('bg-white', 'border-slate-200', 'shadow-sm');
+        
+        const buttons = card.querySelectorAll('button');
+        buttons.forEach((btn, idx) => {
+          if ((idx + 1) === val) {
+            btn.className = 'flex-1 py-2 sm:py-2.5 px-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all duration-150 bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
+          } else {
+            btn.className = 'flex-1 py-2 sm:py-2.5 px-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all duration-150 bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200';
+          }
+        });
+      }
+
+      // Auto-advance
+      setTimeout(() => {
+        const allCards = Array.from(document.querySelectorAll('[id^="q-card-"]'));
+        const currentIndex = allCards.findIndex(c => c.id === `q-card-${itemId}`);
+        if (currentIndex !== -1 && currentIndex < allCards.length - 1) {
+          const nextCard = allCards[currentIndex + 1];
+          const offset = 100;
+          const bodyRect = document.body.getBoundingClientRect().top;
+          const elementRect = nextCard.getBoundingClientRect().top;
+          const elementPosition = elementRect - bodyRect;
+          const offsetPosition = elementPosition - offset;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      }, 350);
+    }
+
+
+    // Update progress bar
+    function updateProgressBar() {
+      const answeredCount = Object.keys(userResponses).length;
+      const totalCount = ITEMS_DATA.length;
+      const pct = Math.round((answeredCount / totalCount) * 100);
+
+      document.getElementById('progress-status-text').innerText = `Đang hoàn thành: ${answeredCount} / ${totalCount} câu hỏi`;
+      document.getElementById('progress-percent').innerText = `${pct}%`;
+      document.getElementById('progress-bar-fill').style.width = `${pct}%`;
+    }
+
+    // Demo profiles auto-filler
+    function fillDemoProfile(type) {
+      document.getElementById('demo-dropdown').classList.add('hidden');
+      
+      ITEMS_DATA.forEach(item => {
+        let score = 3;
+        const d = item.dim;
+        const sub = item.subscale;
+        const pol = item.polarity;
+
+        if (type === 'clinical') {
+          // High Micro, high empathy PT, low PD, healthy altruism
+          if (sub.includes('Micro')) score = 5;
+          else if (sub.includes('Meso')) score = 4;
+          else if (sub.includes('Macro')) score = 3;
+          else if (sub.includes('Empirical') || sub.includes('Relational')) score = 5;
+          else if (sub.includes('Technological')) score = 3;
+          else if (sub.includes('People')) score = (pol === '+1' ? 5 : 1);
+          else if (sub.includes('Perspective Taking')) score = (pol === '+1' ? 5 : 1);
+          else if (sub.includes('Personal Distress')) score = (pol === '+1' ? 2 : 5);
+          else if (sub.includes('Certainty')) score = (pol === '+1' ? 6 : 2);
+          else if (sub.includes('Uncertainty')) score = 2;
+          else if (sub.includes('Healthy')) score = 5;
+          else if (sub.includes('Sacrificing')) score = 2;
+          else if (sub.includes('Utility') || sub.includes('Self-Efficacy')) score = (pol === '+1' ? 5 : 1);
+          else if (sub.includes('Defensiveness')) score = (pol === '+1' ? 2 : 4);
+          else score = 4;
+        } else if (type === 'ux_tech') {
+          // High Data, high Things, high Tech, high Ambiguity Tolerance
+          if (sub.includes('Technological')) score = 5;
+          else if (sub.includes('Things') || sub.includes('Data')) score = 5;
+          else if (sub.includes('People')) score = (pol === '+1' ? 3 : 3);
+          else if (sub.includes('Ambiguity') || sub.includes('Novelty')) score = (pol === '+1' ? 5 : 1);
+          else if (sub.includes('Empirical')) score = 5;
+          else if (sub.includes('Relational')) score = 3;
+          else if (sub.includes('Personal Distress')) score = (pol === '+1' ? 1 : 5);
+          else if (sub.includes('Utility')) score = 5;
+          else score = 3;
+        } else if (type === 'school') {
+          // High Meso, high People, child development
+          if (sub.includes('Meso') || sub.includes('Micro')) score = 5;
+          else if (sub.includes('People')) score = 5;
+          else if (sub.includes('Relational')) score = 5;
+          else if (sub.includes('Healthy')) score = 4;
+          else if (sub.includes('Utility')) score = 5;
+          else score = 4;
+        } else if (type === 'burnout_risk') {
+          // High PD, high Sacrifice, low Healthy, IER flags
+          if (sub.includes('Personal Distress')) score = 5;
+          else if (sub.includes('Sacrificing')) score = 5;
+          else if (sub.includes('Healthy')) score = 1;
+          else if (sub.includes('Uncertainty')) score = 6;
+          else if (sub.includes('Defensiveness')) score = 5;
+          else if (sub.includes('Self-Efficacy')) score = 1;
+          else score = 4;
+        }
+
+        // Handle IER
+        if (item.id === 'IER_DIR_01') score = (type === 'burnout_risk' ? 5 : 1); // Fail flag 1 on burnout
+        if (item.id === 'IER_DIR_02') score = (type === 'burnout_risk' ? 1 : 4); // Fail flag 2 on burnout
+        if (item.id === 'IER_INC_01a') score = 5;
+        if (item.id === 'IER_INC_01b') score = (type === 'burnout_risk' ? 5 : 1); // Discrepancy on burnout
+
+        userResponses[item.id] = score;
+      });
+
+      updateProgressBar();
+      renderQuestions();
+      calculateResults();
+    }
+
+    
+    function resetAssessment() {
+      userResponses = {};
+      localStorage.removeItem('mvab_responses');
+      document.getElementById('section-results').classList.add('hidden');
+      updateProgressBar();
+      renderQuestions();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+);
+    }
+
+    // Psychometric Engine & Calculations
+    function calculateResults() {
+      const answeredCount = Object.keys(userResponses).length;
+      if (answeredCount < 40) {
+        alert(`Bạn mới trả lời ${answeredCount}/84 câu. Vui lòng hoàn thành thêm hoặc bấm nút "Điền Mẫu Test Nhanh" trên thanh công cụ để trải nghiệm demo!`);
+        return;
+      }
+
+      // 1. IER Audit
+      let ierFlags = 0;
+      let ierDetails = [];
+
+      // Check DIR 01
+      if (userResponses['IER_DIR_01'] !== undefined && userResponses['IER_DIR_01'] !== 1) {
+        ierFlags++;
+        ierDetails.push('Không tuân thủ câu lệnh điều hướng điểm sàn (IER_DIR_01 != 1)');
+      }
+      // Check DIR 02
+      if (userResponses['IER_DIR_02'] !== undefined && userResponses['IER_DIR_02'] !== 4) {
+        ierFlags++;
+        ierDetails.push('Không tuân thủ câu lệnh điều hướng điểm 4 (IER_DIR_02 != 4)');
+      }
+      // Check Inconsistency Pair
+      if (userResponses['IER_INC_01a'] !== undefined && userResponses['IER_INC_01b'] !== undefined) {
+        const diff = Math.abs(userResponses['IER_INC_01a'] - (6 - userResponses['IER_INC_01b']));
+        if (diff > 2) {
+          ierFlags++;
+          ierDetails.push(`Mâu thuẫn ngữ nghĩa nghiêm trọng (|Δ| = ${diff} > 2 giữa câu 83 và 84)`);
+        }
+      }
+
+      // Render IER Card
+      const ierCard = document.getElementById('ier-audit-card');
+      if (ierFlags === 0) {
+        ierCard.className = 'rounded-2xl p-6 bg-emerald-50 border border-emerald-200 text-emerald-900';
+        ierCard.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold">✓</div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="font-bold text-base">Hồ Sơ Hợp Thức & Đạt Độ Tin Cậy Tuyệt Đối</h4>
+                <span class="bg-emerald-200/80 text-emerald-800 text-xs px-2 py-0.5 rounded-full font-semibold">IER Flag = 0</span>
+              </div>
+              <p class="text-xs text-emerald-700 mt-0.5">Không phát hiện hiện tượng trả lời thiếu nỗ lực, click ngẫu nhiên hoặc mệt mỏi nhận thức.</p>
+            </div>
+          </div>
+        `;
+      } else if (ierFlags === 1) {
+        ierCard.className = 'rounded-2xl p-6 bg-amber-50 border border-amber-200 text-amber-900';
+        ierCard.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center font-bold">!</div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="font-bold text-base">Cảnh Báo Nhẹ: Hồ Sơ Cần Lưu Ý</h4>
+                <span class="bg-amber-200 text-amber-800 text-xs px-2 py-0.5 rounded-full font-semibold">IER Flag = 1</span>
+              </div>
+              <p class="text-xs text-amber-700 mt-0.5">Phát hiện 1 dấu hiệu không nhất quán: ${ierDetails[0]}.</p>
+            </div>
+          </div>
+        `;
+      } else {
+        ierCard.className = 'rounded-2xl p-6 bg-rose-50 border border-rose-200 text-rose-900';
+        ierCard.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center font-bold">✕</div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="font-bold text-base">Cảnh Báo Rủi Ro: Dữ Liệu Thiếu Nỗ Lực (Inattentive Responding)</h4>
+                <span class="bg-rose-200 text-rose-800 text-xs px-2 py-0.5 rounded-full font-semibold">IER Flag = ${ierFlags} (≥ 2)</span>
+              </div>
+              <p class="text-xs text-rose-700 mt-0.5">Hồ sơ kích hoạt nhiều cờ kiểm tra liêm chính: ${ierDetails.join('; ')}. Kết quả có thể không phản ánh đúng tâm lý thực tế.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. Calculate Dimension Scores
+      const dimScores = calculateDimensions();
+
+      // 3. Render Radar Charts
+      renderCharts(dimScores);
+
+      // 4. Calculate Career Cluster Compatibilities
+      renderCareerClusters(dimScores);
+
+      // 5. Evaluate Configural Rules
+      renderConfiguralRules(dimScores);
+
+      // 6. Supervisory Profile
+      renderSupervisorySynthesis(dimScores);
+
+      // Show results and scroll
+      document.getElementById('section-results').classList.remove('hidden');
+      document.getElementById('section-results').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function calculateDimensions() {
+      const scores = {
+        // D1
+        d1_micro: 0, d1_meso: 0, d1_macro: 0,
+        // D2
+        d2_ambiguity: 0,
+        // D3
+        d3_emp: 0, d3_rel: 0, d3_tec: 0,
+        // D4
+        d4_people: 0, d4_things: 0, d4_data: 0,
+        // D5
+        d5_pt: 0, d5_pd: 0,
+        // D6
+        d6_mentalizing: 0,
+        // D7
+        d7_healthy: 0, d7_sacrifice: 0,
+        // D8
+        d8_utility: 0, d8_efficacy: 0, d8_defense: 0
+      };
+
+      ITEMS_DATA.forEach(item => {
+        let raw = userResponses[item.id] || 3;
+        // Reverse coding
+        if (item.polarity == -1) {
+          raw = (item.maxScore + 1) - raw;
+        }
+
+        // Accumulate
+        if (item.id.startsWith('D1_MIC')) scores.d1_micro += raw;
+        else if (item.id.startsWith('D1_MES')) scores.d1_meso += raw;
+        else if (item.id.startsWith('D1_MAC')) scores.d1_macro += raw;
+        else if (item.id.startsWith('D2_AMB')) scores.d2_ambiguity += raw;
+        else if (item.id.startsWith('D3_EMP')) scores.d3_emp += raw;
+        else if (item.id.startsWith('D3_REL')) scores.d3_rel += raw;
+        else if (item.id.startsWith('D3_TEC')) scores.d3_tec += raw;
+        else if (item.id.startsWith('D4_PEO')) scores.d4_people += raw;
+        else if (item.id.startsWith('D4_THI')) scores.d4_things += raw;
+        else if (item.id.startsWith('D4_DAT')) scores.d4_data += raw;
+        else if (item.id.startsWith('D5_PT')) scores.d5_pt += raw;
+        else if (item.id.startsWith('D5_PD')) scores.d5_pd += raw;
+        else if (item.id.startsWith('D6_RFQ')) scores.d6_mentalizing += raw;
+        else if (item.id.startsWith('D7_HEA')) scores.d7_healthy += raw;
+        else if (item.id.startsWith('D7_SAC')) scores.d7_sacrifice += raw;
+        else if (item.id.startsWith('D8_FUT')) scores.d8_utility += raw;
+        else if (item.id.startsWith('D8_FSE')) scores.d8_efficacy += raw;
+        else if (item.id.startsWith('D8_FDE')) scores.d8_defense += raw;
+      });
+
+      // Convert to T-scores (M=50, SD=10) & Percentiles
+      // Normalizing based on theoretical benchmarks
+      return {
+        d1_micro_t: toTScore(scores.d1_micro, 3, 15),
+        d1_meso_t: toTScore(scores.d1_meso, 3, 15),
+        d1_macro_t: toTScore(scores.d1_macro, 3, 15),
+        d2_amb_t: toTScore(scores.d2_ambiguity, 6, 30),
+        d3_emp_t: toTScore(scores.d3_emp, 4, 20),
+        d3_rel_t: toTScore(scores.d3_rel, 4, 20),
+        d3_tec_t: toTScore(scores.d3_tec, 4, 20),
+        d4_people_t: toTScore(scores.d4_people, 6, 30),
+        d4_things_t: toTScore(scores.d4_things, 3, 15),
+        d4_data_t: toTScore(scores.d4_data, 3, 15),
+        d5_pt_t: toTScore(scores.d5_pt, 4, 20),
+        d5_pd_t: toTScore(scores.d5_pd, 4, 20),
+        d6_men_t: toTScore(scores.d6_mentalizing, 7, 49),
+        d7_hea_t: toTScore(scores.d7_healthy, 5, 25),
+        d7_sac_t: toTScore(scores.d7_sacrifice, 5, 25),
+        d8_uti_t: toTScore(scores.d8_utility, 5, 25),
+        d8_eff_t: toTScore(scores.d8_efficacy, 5, 25),
+        d8_def_t: toTScore(scores.d8_defense, 6, 30)
+      };
+    }
+
+    function toTScore(raw, minVal, maxVal) {
+      const mean = (minVal + maxVal) / 2;
+      const sd = (maxVal - minVal) / 5;
+      const z = (raw - mean) / sd;
+      const t = Math.round(50 + 10 * z);
+      return Math.max(20, Math.min(80, t));
+    }
+
+    function toPercentile(t) {
+      // Standard normal cdf approximation from T-score
+      const z = (t - 50) / 10;
+      const p = 1 / (1 + Math.exp(-1.654 * z));
+      return Math.round(p * 100);
+    }
+
+    // Render Dual Radar Charts
+    function renderCharts(s) {
+      // Chart 1: Tier I
+      const ctx1 = document.getElementById('chart-tier1').getContext('2d');
+      if (chartTier1Instance) chartTier1Instance.destroy();
+
+      chartTier1Instance = new Chart(ctx1, {
+        type: 'radar',
+        data: {
+          labels: ['D1: Micro', 'D1: Meso', 'D1: Macro', 'D2: Mơ hồ', 'D3: Thực chứng', 'D3: Quan hệ', 'D3: Tech', 'D4: People', 'D4: Things/Data'],
+          datasets: [{
+            label: 'Điểm T-Score Sinh Viên',
+            data: [
+              s.d1_micro_t, s.d1_meso_t, s.d1_macro_t, s.d2_amb_t,
+              s.d3_emp_t, s.d3_rel_t, s.d3_tec_t, s.d4_people_t,
+              Math.max(s.d4_things_t, s.d4_data_t)
+            ],
+            backgroundColor: 'rgba(79, 70, 229, 0.2)',
+            borderColor: 'rgba(79, 70, 229, 1)',
+            borderWidth: 2,
+            pointBackgroundColor: 'rgba(79, 70, 229, 1)',
+            pointRadius: 4
+          }, {
+            label: 'Chuẩn Quần Thể (T=50)',
+            data: [50, 50, 50, 50, 50, 50, 50, 50, 50],
+            borderColor: 'rgba(148, 163, 184, 0.5)',
+            borderDash: [4, 4],
+            borderWidth: 1.5,
+            fill: false,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              min: 20,
+              max: 80,
+              ticks: { stepSize: 15 }
+            }
+          }
+        }
+      });
+
+      // Chart 2: Tier II
+      const ctx2 = document.getElementById('chart-tier2').getContext('2d');
+      if (chartTier2Instance) chartTier2Instance.destroy();
+
+      chartTier2Instance = new Chart(ctx2, {
+        type: 'radar',
+        data: {
+          labels: ['D5: Thấu cảm (PT)', 'D5: Ngợp lo (PD)', 'D6: Tâm trí hóa', 'D7: Vị tha Lành', 'D7: Hy sinh Bệnh', 'D8: Cầu thị (Uti)', 'D8: Tự tin (Eff)', 'D8: Tự vệ (Def)'],
+          datasets: [{
+            label: 'Hồ Sơ Giám Sát (T-Score)',
+            data: [
+              s.d5_pt_t, s.d5_pd_t, s.d6_men_t, s.d7_hea_t,
+              s.d7_sac_t, s.d8_uti_t, s.d8_eff_t, s.d8_def_t
+            ],
+            backgroundColor: 'rgba(147, 51, 234, 0.2)',
+            borderColor: 'rgba(147, 51, 234, 1)',
+            borderWidth: 2,
+            pointBackgroundColor: 'rgba(147, 51, 234, 1)',
+            pointRadius: 4
+          }, {
+            label: 'Chuẩn Quần Thể (T=50)',
+            data: [50, 50, 50, 50, 50, 50, 50, 50],
+            borderColor: 'rgba(148, 163, 184, 0.5)',
+            borderDash: [4, 4],
+            borderWidth: 1.5,
+            fill: false,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              min: 20,
+              max: 80,
+              ticks: { stepSize: 15 }
+            }
+          }
+        }
+      });
+    }
+
+    // 9 Career Clusters Matching Logic
+    function renderCareerClusters(s) {
+      const pr5 = document.getElementById('pr5').value;
+      const pr1 = document.getElementById('pr1').value;
+
+      const clusters = [
+        {
+          id: 1,
+          name: 'Cụm 1: Tâm lý học Lâm sàng & Sức khỏe Y tế',
+          legal: 'Luật KBCB 2023 & NĐ 96/2023: Bắt buộc 09 tháng thực hành bệnh viện nội trú.',
+          apa: 'APA Div 12 (Clinical), 40 (Neuropsychology), 56 (Trauma), 38 (Health Psychology), 22 (Rehab)',
+          desc: 'Thực hành chẩn đoán, đánh giá và can thiệp tâm lý trong môi trường y tế đa khoa, bệnh viện tâm thần hoặc trung tâm phục hồi chức năng.',
+          match: Math.round((s.d1_micro_t * 0.35 + s.d3_emp_t * 0.25 + s.d3_rel_t * 0.2 + (80 - s.d5_pd_t) * 0.2) * (pr5 === 'yes' ? 1.0 : (pr5 === 'maybe' ? 0.8 : 0.4)))
+        },
+        {
+          id: 2,
+          name: 'Cụm 2: Tham vấn Tâm lý & Trị liệu Ngoại trú Phi Y tế',
+          legal: 'Bộ luật Dân sự: Hành nghề tự do hoặc thành lập văn phòng tham vấn tư nhân.',
+          apa: 'APA Div 17 (Counseling), 29 (Psychotherapy), 32 (Humanistic), 43 (Family)',
+          desc: 'Đồng hành tháo gỡ khủng hoảng đời sống, mâu thuẫn gia đình, tình yêu và phát triển tiềm năng cá nhân.',
+          match: Math.round(s.d1_micro_t * 0.4 + s.d3_rel_t * 0.3 + s.d4_people_t * 0.2 + s.d5_pt_t * 0.1)
+        },
+        {
+          id: 3,
+          name: 'Cụm 3: Tâm lý học Học đường & Can thiệp Phát triển',
+          legal: 'Thông tư 20/2023/TT-BGDĐT: Mã chức danh Viên chức Tư vấn học sinh V.07.07.24.',
+          apa: 'APA Div 16 (School), 53 (Child Clinical), 54 (Pediatric), 7 (Developmental)',
+          desc: 'Tư vấn học đường, can thiệp sớm trẻ có nhu cầu đặc biệt (tự kỷ, ADHD), hỗ trợ kỹ năng tâm lý học đường.',
+          match: Math.round(s.d1_meso_t * 0.35 + s.d1_micro_t * 0.25 + s.d4_people_t * 0.25 + s.d3_rel_t * 0.15)
+        },
+        {
+          id: 4,
+          name: 'Cụm 4: Tâm lý Tổ chức, Doanh nghiệp & Quản trị Nhân sự (I/O)',
+          legal: 'Bộ luật Lao động: Khối doanh nghiệp trong nước & FDI, đa quốc gia.',
+          apa: 'APA Div 14 (SIOP - Industrial & Organizational), Div 13 (Consulting)',
+          desc: 'Đào tạo và phát triển (L&D), tuyển dụng nhân tài, xây dựng văn hóa doanh nghiệp, hỗ trợ nhân viên (EAP).',
+          match: Math.round(s.d1_meso_t * 0.4 + s.d4_people_t * 0.3 + (pr1 === 'high' ? 65 : 50) * 0.15 + s.d8_uti_t * 0.15)
+        },
+        {
+          id: 5,
+          name: 'Cụm 5: Tâm lý Tiêu dùng, Tiếp thị & Kinh tế Hành vi',
+          legal: 'Thương mại & Dịch vụ: Các tập đoàn bán lẻ, sàn TMĐT, Fintech, Marketing Agency.',
+          apa: 'APA Div 23 (Consumer Psychology), Div 46 (Media & Tech)',
+          desc: 'Nghiên cứu hành vi người tiêu dùng, thiết kế cú hích hành vi (Nudge), tối ưu hóa trải nghiệm khách hàng.',
+          match: Math.round(s.d4_data_t * 0.35 + s.d3_emp_t * 0.25 + s.d2_amb_t * 0.25 + s.d1_macro_t * 0.15)
+        },
+        {
+          id: 6,
+          name: 'Cụm 6: Công thái Nhận thức, Trải nghiệm Người dùng (UX) & Não bộ',
+          legal: 'Công nghệ & Đổi mới sáng tạo: Công ty phần mềm, AI Labs, Studio Game.',
+          apa: 'APA Div 21 (Applied Experimental & Engineering), Div 3, Div 6, Div 40',
+          desc: 'UX Researcher, thiết kế tương tác người - máy tính, ứng dụng khoa học thần kinh và đánh giá an toàn AI.',
+          match: Math.round(s.d3_tec_t * 0.4 + s.d4_data_t * 0.3 + s.d4_things_t * 0.2 + s.d2_amb_t * 0.1)
+        },
+        {
+          id: 7,
+          name: 'Cụm 7: Tâm lý Thể thao, Hiệu suất Đỉnh cao & Nghệ thuật',
+          legal: 'Thể thao chuyên nghiệp & Nghệ thuật: Trung tâm HLTT Quốc gia, CLB Esports.',
+          apa: 'APA Div 47 (Sport & Exercise Psychology), Div 10 (Aesthetics & Creativity)',
+          desc: 'Huấn luyện tâm lý thi đấu đỉnh cao, duy trì trạng thái dòng chảy (Flow), phục hồi tâm lý sau thất bại.',
+          match: Math.round(s.d1_micro_t * 0.3 + s.d3_emp_t * 0.3 + (80 - s.d5_pd_t) * 0.2 + s.d2_amb_t * 0.2)
+        },
+        {
+          id: 8,
+          name: 'Cụm 8: Tâm lý Pháp y, Tội phạm & An ninh Tư pháp',
+          legal: 'Tư pháp & Y tế công lập: Viện Pháp y Tâm thần Trung ương, Tòa án, Trại giam.',
+          apa: 'APA Div 41 (Psychology and Law), Div 18 (Public Service)',
+          desc: 'Giám định tâm thần tư pháp, đánh giá nguy cơ tái phạm, tâm lý học lời khai và bảo vệ nhân chứng.',
+          match: Math.round(s.d3_emp_t * 0.35 + (80 - s.d5_pd_t) * 0.25 + s.d1_macro_t * 0.2 + s.d2_amb_t * 0.2)
+        },
+        {
+          id: 9,
+          name: 'Cụm 9: Nghiên cứu Học thuật, Giảng dạy & Đo lường Tâm trắc',
+          legal: 'Giáo dục Đại học & Viện Hàn lâm: Các trường ĐH, Viện nghiên cứu, tổ chức NGO.',
+          apa: 'APA Div 2 (Teaching), Div 5 (Quantitative Methods & Psychometrics), Div 27 (Community)',
+          desc: 'Giảng dạy đại học, chuẩn hóa thang đo tâm trắc học, nghiên cứu chính sách an sinh xã hội.',
+          match: Math.round(s.d4_data_t * 0.35 + s.d3_emp_t * 0.25 + s.d1_macro_t * 0.25 + s.d8_uti_t * 0.15)
+        }
+      ];
+
+      // Sort by match descending
+      clusters.sort((a, b) => b.match - a.match);
+
+      const container = document.getElementById('clusters-ranking-container');
+      container.innerHTML = '';
+
+      clusters.forEach((c, idx) => {
+        const isTop = idx < 3;
+        const card = document.createElement('div');
+        card.className = `p-4 sm:p-5 rounded-2xl border transition-all ${
+          isTop 
+            ? 'bg-gradient-to-r from-indigo-50/80 to-white border-indigo-200 shadow-sm ring-1 ring-indigo-200/50' 
+            : 'bg-white border-slate-200/70'
+        }`;
+
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                isTop ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
+              }">${idx + 1}</span>
+              <h4 class="font-bold text-base text-slate-900">${c.name}</h4>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold px-2 py-0.5 rounded ${
+                isTop ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'
+              }">Khớp nối: ${Math.min(99, Math.max(40, c.match))}%</span>
+            </div>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-600 mb-2 leading-relaxed">${c.desc}</p>
+          <div class="flex flex-col sm:flex-row gap-2 text-xs pt-2 border-t border-slate-100/80">
+            <span class="text-slate-500"><strong class="text-slate-700">Pháp lý VN:</strong> ${c.legal}</span>
+          </div>
+          <div class="text-[11px] text-indigo-700 font-medium mt-1">
+            <strong class="text-slate-600">Thẻ APA quốc tế:</strong> ${c.apa}
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // Evaluate 9 Configural Rules
+    function renderConfiguralRules(s) {
+      const rules = [
+        {
+          id: 'RULE_01',
+          name: 'Sức Bật Sang Chấn (Trauma Resilience)',
+          triggered: (s.d5_pt_t > 58 && s.d5_pd_t < 44 && s.d2_amb_t > 52),
+          type: 'positive',
+          roadmap: 'Tập trung phòng ngừa mệt mỏi thấu cảm (Compassion Fatigue). Thực hành nhật ký tự phản tỉnh sau ca.',
+          feedback: 'Hồ sơ của bạn cho thấy khả năng duy trì góc nhìn khách quan và điều hòa cảm xúc tốt trước các câu chuyện mang tính sang chấn (Div 56, 41).'
+        },
+        {
+          id: 'RULE_02',
+          name: 'Cứu Rỗi & Nguy Cơ Ranh Giới (Savior / Boundary Risk)',
+          triggered: (s.d7_sac_t > 58 && s.d8_eff_t < 46 && s.d3_rel_t > 58),
+          type: 'warning',
+          roadmap: 'Giám sát dựa trên tâm trí hóa (Mentalization). Phân định nhu cầu thân chủ và nhu cầu "được cần đến" của bản thân.',
+          feedback: 'Bạn có lòng trắc ẩn sâu sắc. Thiết lập ranh giới can thiệp rõ ràng sẽ là công cụ bảo vệ bạn bền vững và trao quyền tự chủ cho thân chủ.'
+        },
+        {
+          id: 'RULE_03',
+          name: 'Nhà Vận Động Hệ Thống (Systemic Advocate)',
+          triggered: (s.d4_people_t > 58 && s.d1_macro_t > 56 && s.d2_amb_t > 50),
+          type: 'positive',
+          roadmap: 'Rèn luyện khả năng chịu đựng sự trì trệ của hệ thống (Frustration tolerance). Xây dựng liên minh đa ngành.',
+          feedback: 'Với tư duy vĩ mô và sự nhạy bén với cấu trúc xã hội, bạn có tiềm năng tạo chuyển biến ở tầm chính sách và cộng đồng (Div 27, 9).'
+        },
+        {
+          id: 'RULE_04',
+          name: 'Kiến Trúc Sư Công Thái Nhận Thức (Cognitive / Data Architect)',
+          triggered: (Math.max(s.d4_things_t, s.d4_data_t) > 58 && s.d3_emp_t > 56 && s.d5_pt_t <= 55),
+          type: 'positive',
+          roadmap: 'Phát triển các dự án ứng dụng Tâm trắc học, AI, Yếu tố con người. Giám sát viên đóng vai trò cố vấn chuyên môn.',
+          feedback: 'Hồ sơ của bạn nổi bật với tư duy hệ thống và phân tích dữ liệu (Div 21, 14, 5). Bạn là kiến trúc sư kiến tạo các quy trình chuẩn xác.'
+        },
+        {
+          id: 'RULE_05',
+          name: 'Ngập Lụt Thấu Cảm & Tê Liệt Thực Tập Sinh (Empathic Flooding)',
+          triggered: (s.d5_pd_t > 60 && s.d2_amb_t < 44),
+          type: 'danger',
+          roadmap: 'Can thiệp hỗ trợ sớm ở IDM Level 1: Giảm tải ca bệnh nặng, áp dụng kỹ thuật xoa dịu cảm xúc (Grounding).',
+          feedback: 'Độ nhạy cảm cảm xúc của bạn rất cao. Cần rèn luyện tấm màng lọc cảm xúc để bảo vệ nội lực trước khi bước vào các ca lâm sàng nặng.'
+        },
+        {
+          id: 'RULE_06',
+          name: 'Cuồng Tín Đạo Đức vs Quán Tính Thể Chế (Moral Zealot)',
+          triggered: (s.d1_macro_t > 60 && s.d2_amb_t < 42),
+          type: 'warning',
+          roadmap: 'Dạy kỹ năng "chiến lược gia" thay vì "chiến binh". Phát triển tư duy biện chứng (Dialectical thinking).',
+          feedback: 'Lý tưởng cải cách xã hội của bạn rất cao. Hãy trang bị sự kiên nhẫn với các tiến trình chuyển đổi chậm chạp của tổ chức.'
+        },
+        {
+          id: 'RULE_07',
+          name: 'Kỹ Thuật Viên Lạnh Lùng / Trí Thức Hóa (Cold Intellectualizer)',
+          triggered: (s.d3_emp_t > 60 && s.d5_pt_t > 55 && s.d6_men_t < 45),
+          type: 'warning',
+          roadmap: 'Giám sát qua băng hình ca lâm sàng, tập trung vào tiến trình tương tác (Process) "tại đây và lúc này" thay vì lý thuyết thuần túy.',
+          feedback: 'Bạn nắm rất vững công cụ kỹ thuật. Hãy bổ sung sự kết nối cảm xúc chân thực để nuôi dưỡng liên minh trị liệu bền chặt.'
+        },
+        {
+          id: 'RULE_08',
+          name: 'Cân Bằng Lâm Sàng - Thương Mại (Clinical-Commercial Dilemma)',
+          triggered: (s.d3_rel_t > 58 && document.getElementById('pr1').value === 'high'),
+          type: 'neutral',
+          roadmap: 'Khuyến nghị mô hình "Thực hành Kép (Hybrid Trajectory)": EAP Doanh nghiệp kết hợp phòng tham vấn tư nhân.',
+          feedback: 'Khao khát chữa lành nhân văn hoàn toàn có thể song hành cùng sự độc lập tài chính thông qua các dịch vụ EAP và doanh nghiệp.'
+        },
+        {
+          id: 'RULE_09',
+          name: 'Hội Chứng Kẻ Giả Mạo & Bất An Giám Sát (Imposter Defense)',
+          triggered: (s.d8_uti_t > 58 && s.d8_eff_t < 44 && s.d5_pt_t > 56),
+          type: 'warning',
+          roadmap: 'Giám sát viên thiết lập môi trường an toàn tâm lý tuyệt đối, phản hồi dựa trên điểm mạnh (Strengths-based Feedback).',
+          feedback: 'Sự cầu thị học hỏi của bạn rất đáng quý. Hãy nhớ sự bất an trong những bước đi đầu tiên là trải nghiệm phổ quát của mọi nhà thực hành.'
+        }
+      ];
+
+      const container = document.getElementById('configural-rules-container');
+      container.innerHTML = '';
+
+      rules.forEach(r => {
+        const card = document.createElement('div');
+        const isTrig = r.triggered;
+
+        let badgeClass = 'bg-slate-100 text-slate-500 border-slate-200';
+        let statusText = 'Chưa kích hoạt';
+
+        if (isTrig) {
+          if (r.type === 'positive') {
+            badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+            statusText = 'Kích Hoạt (Thế mạnh)';
+          } else if (r.type === 'warning') {
+            badgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
+            statusText = 'Kích Hoạt (Cần lưu ý)';
+          } else if (r.type === 'danger') {
+            badgeClass = 'bg-rose-100 text-rose-800 border-rose-300';
+            statusText = 'Kích Hoạt (Cần hỗ trợ)';
+          } else {
+            badgeClass = 'bg-indigo-100 text-indigo-800 border-indigo-300';
+            statusText = 'Kích Hoạt (Chiến lược)';
+          }
+        }
+
+        card.className = `p-4 rounded-xl border text-xs ${
+          isTrig ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'bg-slate-50/60 opacity-60 border-slate-200'
+        }`;
+
+        card.innerHTML = `
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-bold text-slate-800 text-sm">${r.name}</span>
+            <span class="px-2 py-0.5 rounded-full border text-[11px] font-semibold ${badgeClass}">${statusText}</span>
+          </div>
+          ${isTrig ? `
+            <p class="text-slate-600 mb-2 leading-relaxed italic">"${r.feedback}"</p>
+            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 text-slate-700">
+              <strong class="text-indigo-700 font-semibold">Lộ trình IDM:</strong> ${r.roadmap}
+            </div>
+          ` : '<p class="text-slate-400">Không có dấu hiệu xung đột nhận thức hoặc tương tác đặc biệt ở quy tắc này.</p>'}
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // Supervisory Synthesis
+    function renderSupervisorySynthesis(s) {
+      const container = document.getElementById('supervisory-synthesis-container');
+
+      // 1. Quadrant of Altruism (D7)
+      let altruismProfile = '';
+      if (s.d7_hea_t >= 50 && s.d7_sac_t < 50) {
+        altruismProfile = '<span class="text-emerald-400 font-bold">Nhà Thực Hành Bền Vững</span>: Biết bảo vệ năng lượng cá nhân và trao quyền tự chủ cho thân chủ.';
+      } else if (s.d7_hea_t < 50 && s.d7_sac_t >= 50) {
+        altruismProfile = '<span class="text-rose-400 font-bold">Nguy Cơ Kiệt Sức / Phức Cảm Cứu Rỗi</span>: Hy sinh quên mình quá mức, dễ bị suy kiệt nội lực sớm.';
+      } else if (s.d7_hea_t >= 50 && s.d7_sac_t >= 50) {
+        altruismProfile = '<span class="text-amber-400 font-bold">Dấn Thân Đầy Xung Đột</span>: Vừa muốn tự chăm sóc vừa bị thôi thúc cứu vớt người khác.';
+      } else {
+        altruismProfile = '<span class="text-slate-400 font-bold">Tách Rời Ranh Giới</span>: Duy trì khoảng cách an toàn nhưng cần nuôi dưỡng nhiệt huyết dấn thân.';
+      }
+
+      // 2. Empathic Boundaries (D5)
+      let empathyProfile = '';
+      if (s.d5_pt_t >= 50 && s.d5_pd_t < 50) {
+        empathyProfile = '<span class="text-emerald-400 font-bold">Thấu Cảm Nhận Thức Ổn Định</span>: Giữ vững góc nhìn khách quan mà không bị cuốn theo cảm xúc tiêu cực.';
+      } else if (s.d5_pd_t >= 55) {
+        empathyProfile = '<span class="text-rose-400 font-bold">Nguy Cơ Ngập Lụt Cảm Xúc</span>: Dễ bị lây lan nỗi đau của thân chủ, cần giám sát rèn luyện kỹ năng giải tỏa.';
+      } else {
+        empathyProfile = '<span class="text-indigo-400 font-bold">Cân Bằng Tiêu Chuẩn</span>: Đạt mức độ hòa hợp cảm xúc ở ngưỡng trung bình của quần thể.';
+      }
+
+      // 3. Feedback Orientation (D8)
+      let feedbackProfile = '';
+      if (s.d8_uti_t >= 50 && s.d8_def_t < 50) {
+        feedbackProfile = '<span class="text-emerald-400 font-bold">Cầu Thị & Vững Vàng</span>: Xem trọng góp ý của người hướng dẫn, ít cơ chế phòng vệ chống đối.';
+      } else if (s.d8_def_t >= 55) {
+        feedbackProfile = '<span class="text-amber-400 font-bold">Nhạy Cảm Với Phê Bình</span>: Dễ bị tổn thương lòng tự ái khi bị chỉ ra lỗi sai, cần phản hồi nhẹ nhàng.';
+      } else {
+        feedbackProfile = '<span class="text-slate-300 font-bold">Tiếp Nhận Ổn Định</span>: Sẵn sàng hợp tác cùng giám sát viên theo tiến trình chuẩn.';
+      }
+
+      container.innerHTML = `
+        <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700">
+          <h5 class="text-xs uppercase font-bold text-slate-400 mb-2">1. Động Cơ Giúp Đỡ (Trục D7)</h5>
+          <p class="leading-relaxed">${altruismProfile}</p>
+        </div>
+        <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700">
+          <h5 class="text-xs uppercase font-bold text-slate-400 mb-2">2. Ranh Giới Thấu Cảm (Trục D5)</h5>
+          <p class="leading-relaxed">${empathyProfile}</p>
+        </div>
+        <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700">
+          <h5 class="text-xs uppercase font-bold text-slate-400 mb-2">3. Tiếp Nhận Phản Hồi (Trục D8)</h5>
+          <p class="leading-relaxed">${feedbackProfile}</p>
+        </div>
+      `;
+    }
+
+    function exportJson() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+        studentResponses: userResponses,
+        timestamp: new Date().toISOString(),
+        framework: "MVAB v2.1 Publication-Grade",
+        dimensions: calculateDimensions()
+      }, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `MVAB_Profile_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+  </script>
+</body>
+</html>
