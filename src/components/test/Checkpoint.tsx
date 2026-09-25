@@ -120,14 +120,30 @@ export const Checkpoint: React.FC = () => {
       {/* Subtle Mist Overlay */}
       <div className="absolute inset-0 bg-[#f4efe6]/50 backdrop-blur-[2px] pointer-events-none" />
 
-      {/* 2. Checkpoint Card with Ambient Zen Breathing */}
+      {/* 2. Checkpoint Card with Ambient Zen Breathing & Thủy Đình Pavilion */}
       <div 
-        className="relative max-w-xl w-full z-10 transition-transform duration-300"
+        className="relative max-w-xl w-full z-10 transition-transform duration-300 pt-16 sm:pt-20"
         style={{
           transform: `translate3d(${mouse.x * 10}px, ${mouse.y * 8}px, 0)`,
         }}
       >
-        <div className="relative bg-white/85 backdrop-blur-xl rounded-3xl p-6 sm:p-9 border border-stone-300/80 shadow-2xl shadow-stone-900/10">
+        {/* Floating Thủy Đình Pavilion Graphic */}
+        <div 
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-48 sm:w-60 h-36 sm:h-44 pointer-events-none z-10 opacity-90 transition-transform duration-500 ease-out"
+          style={{
+            transform: `translate3d(calc(-50% + ${-mouse.x * 14}px), ${-mouse.y * 8}px, 0)`,
+          }}
+        >
+          <Image
+            src="/assets/thuy-dinh-pavilion.png"
+            alt="Thủy Đình Bên Hồ"
+            fill
+            priority
+            className="object-contain object-bottom drop-shadow-md"
+          />
+        </div>
+
+        <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-9 border border-stone-300/80 shadow-2xl shadow-stone-900/10">
           
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b border-stone-200/80 mb-5">

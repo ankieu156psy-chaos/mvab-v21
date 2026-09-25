@@ -77,16 +77,16 @@ export const HeroLanding: React.FC = () => {
         </button>
       </header>
 
-      {/* 2. LAYER 1: Parallax Floating Botanical Artwork (Generated Clean Transparent Ink Art) */}
+      {/* 2. LAYER 1: Parallax Floating Botanical & Aquatic Artwork (User-Generated Assets) */}
       {/* Left Foliage: Ink-wash Lotus Leaves */}
       <div 
-        className="absolute -left-12 sm:left-4 bottom-0 w-64 sm:w-80 md:w-96 h-80 sm:h-[460px] pointer-events-none z-10 opacity-70 transition-transform duration-500 ease-out"
+        className="absolute -left-10 sm:left-2 bottom-0 w-64 sm:w-80 md:w-[380px] h-72 sm:h-[440px] pointer-events-none z-10 opacity-75 transition-transform duration-500 ease-out"
         style={{
           transform: `translate3d(${-mouse.x * 20}px, ${-mouse.y * 14}px, 0)`,
         }}
       >
         <Image
-          src="/assets/lotus-leaves-clean.png"
+          src="/assets/lotus-leaves-user.png"
           alt="Lá sen mực tàu"
           fill
           priority
@@ -96,14 +96,30 @@ export const HeroLanding: React.FC = () => {
 
       {/* Right Foliage: Blooming Pink Lotus Flower */}
       <div 
-        className="absolute -right-8 sm:right-6 bottom-0 w-64 sm:w-84 md:w-[420px] h-80 sm:h-[460px] pointer-events-none z-10 opacity-85 transition-transform duration-300 ease-out"
+        className="absolute -right-8 sm:right-4 bottom-0 w-64 sm:w-84 md:w-[420px] h-72 sm:h-[450px] pointer-events-none z-10 opacity-85 transition-transform duration-300 ease-out"
         style={{
           transform: `translate3d(${mouse.x * 26}px, ${mouse.y * 18}px, 0)`,
         }}
       >
         <Image
-          src="/assets/lotus-clean.png"
+          src="/assets/lotus-bloom-user.png"
           alt="Bông sen nở rộ"
+          fill
+          priority
+          className="object-contain object-bottom"
+        />
+      </div>
+
+      {/* Center Bottom: Swimming Koi Fish */}
+      <div 
+        className="absolute left-1/2 -translate-x-1/2 bottom-2 sm:bottom-4 w-72 sm:w-96 md:w-[440px] h-36 sm:h-48 pointer-events-none z-10 opacity-80 transition-transform duration-400 ease-out"
+        style={{
+          transform: `translate3d(calc(-50% + ${mouse.x * 15}px), ${mouse.y * 10}px, 0)`,
+        }}
+      >
+        <Image
+          src="/assets/koi-swimming.png"
+          alt="Đàn cá Koi bơi lội"
           fill
           priority
           className="object-contain object-bottom"
