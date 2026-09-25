@@ -77,30 +77,63 @@ export const HeroLanding: React.FC = () => {
         </button>
       </header>
 
+      {/* 2. LAYER 1: Parallax Floating Botanical Artwork (Generated Clean Transparent Ink Art) */}
+      {/* Left Foliage: Ink-wash Lotus Leaves */}
+      <div 
+        className="absolute -left-12 sm:left-4 bottom-0 w-64 sm:w-80 md:w-96 h-80 sm:h-[460px] pointer-events-none z-10 opacity-70 transition-transform duration-500 ease-out"
+        style={{
+          transform: `translate3d(${-mouse.x * 20}px, ${-mouse.y * 14}px, 0)`,
+        }}
+      >
+        <Image
+          src="/assets/lotus-leaves-clean.png"
+          alt="Lá sen mực tàu"
+          fill
+          priority
+          className="object-contain object-bottom"
+        />
+      </div>
+
+      {/* Right Foliage: Blooming Pink Lotus Flower */}
+      <div 
+        className="absolute -right-8 sm:right-6 bottom-0 w-64 sm:w-84 md:w-[420px] h-80 sm:h-[460px] pointer-events-none z-10 opacity-85 transition-transform duration-300 ease-out"
+        style={{
+          transform: `translate3d(${mouse.x * 26}px, ${mouse.y * 18}px, 0)`,
+        }}
+      >
+        <Image
+          src="/assets/lotus-clean.png"
+          alt="Bông sen nở rộ"
+          fill
+          priority
+          className="object-contain object-bottom"
+        />
+      </div>
+
       {/* 3. LAYER 2: Central Editorial Block (MVAB is the largest headline) */}
-      <main className="relative z-20 px-6 sm:px-12 py-12 max-w-4xl mx-auto text-center flex flex-col items-center">
+      <main className="relative z-20 px-6 sm:px-12 py-10 max-w-3xl mx-auto text-center flex flex-col items-center">
         {/* Category Pill */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-900/5 border border-stone-300 text-xs font-semibold text-stone-700 mb-6">
           <span>Công cụ Định hướng Chuyên môn & Nghề nghiệp</span>
         </div>
 
         {/* Primary Largest Headline: MVAB */}
-        <h1 className="text-6xl sm:text-8xl md:text-9xl font-black text-stone-900 tracking-tight leading-none mb-4 font-sans">
+        <h1 className="text-7xl sm:text-8xl md:text-9xl font-black text-stone-900 tracking-tight leading-none mb-4 font-sans drop-shadow-sm">
           MVAB
         </h1>
 
         {/* Clear Subtitle in Pure Vietnamese */}
-        <h2 className="text-lg sm:text-2xl font-bold text-stone-800 max-w-2xl leading-snug mb-5 font-sans">
+        <h2 className="text-lg sm:text-2xl font-bold text-stone-800 max-w-2xl leading-snug mb-4 font-sans">
           Thang Đo Xu Hướng Nghề Nghiệp & Phong Cách Thực Hành Tâm Lý Học
         </h2>
 
         {/* Brief, Objective, Academic Purpose (Vắn tắt, không sến súa) */}
-        <p className="text-stone-600 text-sm sm:text-base leading-relaxed max-w-2xl mb-8 font-sans">
+        <p className="text-stone-600 text-xs sm:text-sm leading-relaxed max-w-xl mb-7 font-sans">
           Hệ thống gồm 84 câu hỏi chuẩn hóa nhằm nhận diện 8 chiều kích năng lực, phong cách can thiệp lâm sàng, mức độ dung nạp mơ hồ và ranh giới chuyên môn của người thực hành tâm lý tại Việt Nam.
         </p>
 
         {/* Metric Badges */}
-        <div className="grid grid-cols-3 gap-3 sm:gap-6 py-3 px-6 rounded-2xl bg-white/60 backdrop-blur-md border border-stone-300/80 mb-8 max-w-md w-full text-center">
+        <div className="grid grid-cols-3 gap-3 sm:gap-6 py-3 px-6 rounded-2xl bg-white/70 backdrop-blur-md border border-stone-300/80 mb-7 max-w-md w-full text-center shadow-sm">
           <div>
             <div className="text-xl font-bold text-stone-900 font-mono">84</div>
             <div className="text-xs text-stone-500">Câu hỏi</div>
@@ -119,7 +152,7 @@ export const HeroLanding: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <button
             onClick={() => setPhase('consent')}
-            className="w-full sm:w-auto px-8 py-4 rounded-full bg-stone-900 hover:bg-stone-800 text-amber-50 font-semibold text-sm tracking-wide transition-all shadow-xl shadow-stone-900/15 active:scale-95 flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-9 py-4 rounded-full bg-stone-900 hover:bg-stone-800 text-amber-50 font-semibold text-sm tracking-wide transition-all shadow-xl shadow-stone-900/15 active:scale-95 flex items-center justify-center gap-2"
           >
             <span>Bắt đầu bài đánh giá</span>
             <span className="font-bold">→</span>
