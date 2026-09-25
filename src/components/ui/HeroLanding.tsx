@@ -9,6 +9,9 @@ export const HeroLanding: React.FC = () => {
   const setPhase = useTestStore((s) => s.setPhase);
   const answerQuestion = useTestStore((s) => s.answerQuestion);
 
+  const participantCode = useTestStore((s) => s.participantCode);
+  const setParticipantCode = useTestStore((s) => s.setParticipantCode);
+
   // Mouse Parallax coordinates (-1 to 1) with smooth dampening
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
@@ -24,6 +27,9 @@ export const HeroLanding: React.FC = () => {
   }, []);
 
   const fillQuickDemo = () => {
+    if (!participantCode) {
+      setParticipantCode('MVAB-DEMO-2026');
+    }
     ITEMS_DATA.forEach((item) => {
       let score = 3;
       if (item.subscale.includes('Vi mô')) score = 5;

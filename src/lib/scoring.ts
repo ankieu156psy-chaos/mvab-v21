@@ -146,158 +146,247 @@ export function auditIER(responses: Record<string, number>): IERAuditResult {
 
 // Career Clusters Evaluation
 export function evaluateCareerClusters(s: DimensionScores): CareerMatch[] {
+  const calcMatch = (rawFit: number, maxBenchmark = 72) => {
+    return Math.min(98, Math.max(35, Math.round((rawFit / maxBenchmark) * 100)));
+  };
+
   const clusters: CareerMatch[] = [
     {
       id: 'cluster_1',
       name: 'Cụm 1: Tâm lý học Lâm sàng & Sức khỏe Y tế',
-      legal: 'Luật KBCB 2023 & NĐ 96/2023: Bắt buộc 09 tháng thực hành bệnh viện nội trú.',
-      apa: 'APA Div 12 (Clinical), 40 (Neuropsychology), 56 (Trauma), 38 (Health Psychology), 22 (Rehab)',
-      desc: 'Thực hành chẩn đoán, đánh giá và can thiệp tâm lý trong môi trường y tế đa khoa, bệnh viện tâm thần hoặc trung tâm phục hồi chức năng.',
-      match: Math.round(s.d1_micro_t * 0.35 + s.d3_emp_t * 0.25 + s.d3_rel_t * 0.2 + (80 - s.d5_pd_t) * 0.2)
+      legal: 'Luật Khám bệnh, chữa bệnh 2023 & NĐ 96/2023/NĐ-CP: Yêu cầu tối thiểu 09 tháng thực hành có hướng dẫn tại cơ sở khám chữa bệnh nội trú để đủ điều kiện cấp Giấy phép hành nghề.',
+      apa: 'APA Div 12 (Society of Clinical Psychology), Div 40 (Clinical Neuropsychology), Div 56 (Trauma Psychology), Div 38 (Health Psychology)',
+      desc: 'Thực hành chẩn đoán tâm lý, lượng giá suy giảm chức năng nhận thức/hành vi, và can thiệp trị liệu tâm lý trong môi trường bệnh viện đa khoa, bệnh viện chuyên khoa tâm thần hoặc trung tâm phục hồi chức năng.',
+      formulaExplanation: 'Chỉ số tương thích = 35% Can thiệp vi mô 1-1 + 25% Bằng chứng thực nghiệm + 20% Liên minh trị liệu + 20% Năng lực ổn định cảm xúc',
+      match: calcMatch(s.d1_micro_t * 0.35 + s.d3_emp_t * 0.25 + s.d3_rel_t * 0.2 + (80 - s.d5_pd_t) * 0.2),
+      coreDrivers: [
+        s.d1_micro_t >= 55 ? `Can thiệp vi mô cá nhân (T=${s.d1_micro_t}) đáp ứng yêu cầu phiên làm việc 1-1 chuyên sâu.` : '',
+        s.d3_emp_t >= 55 ? `Tư duy thực nghiệm (T=${s.d3_emp_t}) phù hợp với phác đồ can thiệp dựa trên chứng cứ (EBP).` : '',
+        s.d5_pd_t < 48 ? `Khả năng kiểm soát ngập lụt cảm xúc tốt (T=${s.d5_pd_t}) giúp duy trì sự bình ổn trước ca bệnh nặng.` : ''
+      ].filter(Boolean),
+      growthAreas: [
+        s.d3_emp_t < 52 ? `Cần củng cố kiến thức đo lường tâm trắc và trắc nghiệm thần kinh (Neuropsychological Testing).` : '',
+        s.d5_pd_t >= 52 ? `Cần chú ý rèn luyện kỹ thuật phân ly cảm xúc lành mạnh để giảm thiểu nguy cơ mệt mỏi thấu cảm.` : '',
+        'Lộ trình yêu cầu hoàn thành thời gian thực hành bệnh viện theo quy định của Bộ Y tế.'
+      ].filter(Boolean)
     },
     {
       id: 'cluster_2',
       name: 'Cụm 2: Tham vấn Tâm lý & Trị liệu Ngoại trú Phi Y tế',
-      legal: 'Bộ luật Dân sự: Hành nghề tự do hoặc thành lập văn phòng tham vấn tư nhân.',
-      apa: 'APA Div 17 (Counseling), 29 (Psychotherapy), 32 (Humanistic), 43 (Family)',
-      desc: 'Đồng hành tháo gỡ khủng hoảng đời sống, mâu thuẫn gia đình, tình yêu và phát triển tiềm năng cá nhân.',
-      match: Math.round(s.d1_micro_t * 0.4 + s.d3_rel_t * 0.3 + s.d4_people_t * 0.2 + s.d5_pt_t * 0.1)
+      legal: 'Bộ luật Dân sự & Luật Doanh nghiệp: Hành nghề tự do, thành lập văn phòng tham vấn tư nhân hoặc hợp tác với các trung tâm tâm lý học độc lập.',
+      apa: 'APA Div 17 (Society of Counseling Psychology), Div 29 (Society for the Advancement of Psychotherapy), Div 32 (Society for Humanistic Psychology)',
+      desc: 'Đồng hành hỗ trợ cá nhân và gia đình tháo gỡ khủng hoảng đời sống, mâu thuẫn mối quan hệ, thích ứng chuyển giai đoạn và khơi mở tiềm năng phát triển nội tâm.',
+      formulaExplanation: 'Chỉ số tương thích = 40% Tương tác vi mô + 30% Mối quan hệ nhân văn + 20% Định hướng con người + 10% Thấu cảm nhận thức',
+      match: calcMatch(s.d1_micro_t * 0.4 + s.d3_rel_t * 0.3 + s.d4_people_t * 0.2 + s.d5_pt_t * 0.1),
+      coreDrivers: [
+        s.d3_rel_t >= 55 ? `Phong cách nhân văn (T=${s.d3_rel_t}) là nền tảng xây dựng liên minh tham vấn an toàn.` : '',
+        s.d4_people_t >= 55 ? `Nhu cầu làm việc với con người cao (T=${s.d4_people_t}) tạo nguồn năng lượng dồi dào trong các phiên đối thoại.` : '',
+        s.d5_pt_t >= 55 ? `Năng lực đồng cảm nhận thức tốt (T=${s.d5_pt_t}) giúp thấu hiểu trọn vẹn lăng kính của thân chủ.` : ''
+      ].filter(Boolean),
+      growthAreas: [
+        s.d7_sac_t >= 55 ? `Cần lưu ý kiểm soát xu hướng cho đi quên mình và ranh giới chuyên môn ngoài phiên tham vấn.` : '',
+        s.d2_amb_t < 50 ? `Rèn luyện sự kiên nhẫn khi thân chủ chưa sẵn sàng thay đổi hoặc diễn tiến trị liệu chậm.` : '',
+        'Cần duy trì giám sát chuyên môn định kỳ (Supervision) để soi chiếu chuyển di và phản chuyển di.'
+      ].filter(Boolean)
     },
     {
       id: 'cluster_3',
       name: 'Cụm 3: Tâm lý học Học đường & Can thiệp Phát triển',
-      legal: 'Thông tư 20/2023/TT-BGDĐT: Mã chức danh Viên chức Tư vấn học sinh V.07.07.24.',
-      apa: 'APA Div 16 (School), 53 (Child Clinical), 54 (Pediatric), 7 (Developmental)',
-      desc: 'Tư vấn học đường, can thiệp sớm trẻ có nhu cầu đặc biệt (tự kỷ, ADHD), hỗ trợ kỹ năng tâm lý học đường.',
-      match: Math.round(s.d1_meso_t * 0.35 + s.d1_micro_t * 0.25 + s.d4_people_t * 0.25 + s.d3_rel_t * 0.15)
+      legal: 'Thông tư số 20/2023/TT-BGDĐT: Quy định mã số, tiêu chuẩn chức danh nghề nghiệp Viên chức Tư vấn học sinh (Mã số V.07.07.24) trong các cơ sở giáo dục phổ thông.',
+      apa: 'APA Div 16 (School Psychology), Div 53 (Clinical Child & Adolescent), Div 7 (Developmental Psychology)',
+      desc: 'Đánh giá phát triển trẻ em, can thiệp sớm các rối loạn học tập và phát triển thần kinh (ADHD, Tự kỷ), tư vấn khó khăn tâm lý học đường và phối hợp gia đình - nhà trường.',
+      formulaExplanation: 'Chỉ số tương thích = 35% Can thiệp trung mô hệ thống + 25% Tương tác cá nhân + 25% Định hướng con người + 15% Quan hệ thấu cảm',
+      match: calcMatch(s.d1_meso_t * 0.35 + s.d1_micro_t * 0.25 + s.d4_people_t * 0.25 + s.d3_rel_t * 0.15),
+      coreDrivers: [
+        s.d1_meso_t >= 55 ? `Khả năng tương tác trung mô (T=${s.d1_meso_t}) giúp kết nối hiệu quả giữa học sinh, phụ huynh và giáo viên.` : '',
+        s.d4_people_t >= 55 ? `Sự kiên nhẫn với trẻ em và thanh thiếu niên (T=${s.d4_people_t}) tạo điểm tựa tâm lý vững vàng.` : ''
+      ].filter(Boolean),
+      growthAreas: [
+        s.d1_meso_t < 50 ? `Cần nâng cao kỹ năng phối hợp đa bên và giải quyết xung đột trong môi trường sư phạm.` : '',
+        'Cần trang bị chứng chỉ can thiệp giáo dục đặc biệt hoặc tâm lý học đường chuyên sâu.'
+      ].filter(Boolean)
     },
     {
       id: 'cluster_4',
       name: 'Cụm 4: Tâm lý Tổ chức, Doanh nghiệp & Quản trị Nhân sự (I/O)',
-      legal: 'Bộ luật Lao động: Khối doanh nghiệp trong nước & FDI, đa quốc gia.',
-      apa: 'APA Div 14 (SIOP - Industrial & Organizational), Div 13 (Consulting)',
-      desc: 'Đào tạo và phát triển (L&D), tuyển dụng nhân tài, xây dựng văn hóa doanh nghiệp, hỗ trợ nhân viên (EAP).',
-      match: Math.round(s.d1_meso_t * 0.4 + s.d4_people_t * 0.3 + 55 * 0.15 + s.d8_fut_t * 0.15)
+      legal: 'Bộ luật Lao động 2019: Khối doanh nghiệp tư nhân, tập đoàn đa quốc gia, công ty tư vấn quản trị và các chương trình Hỗ trợ Nhân viên (EAP).',
+      apa: 'APA Div 14 (Society for Industrial and Organizational Psychology - SIOP), Div 13 (Society of Consulting Psychology)',
+      desc: 'Ứng dụng các quy luật tâm lý vào tuyển dụng nhân tài, đánh giá năng lực (Assessment Center), xây dựng văn hóa doanh nghiệp, đào tạo phát triển (L&D) và thiết kế phúc lợi tâm lý.',
+      formulaExplanation: 'Chỉ số tương thích = 40% Tác động trung mô tổ chức + 30% Hướng con người + 15% Tầm nhìn thực tế + 15% Định hướng tương lai',
+      match: calcMatch(s.d1_meso_t * 0.4 + s.d4_people_t * 0.3 + 52 * 0.15 + s.d8_fut_t * 0.15),
+      coreDrivers: [
+        s.d1_meso_t >= 55 ? `Hiểu biết về văn hóa tổ chức và động lực nhóm (T=${s.d1_meso_t}) là lợi thế lớn trong môi trường doanh nghiệp.` : '',
+        s.d8_fut_t >= 55 ? `Tầm nhìn chiến lược dài hạn (T=${s.d8_fut_t}) giúp hoạch định các chính sách phát triển nhân tài bền vững.` : ''
+      ].filter(Boolean),
+      growthAreas: [
+        s.d4_data_t < 50 ? `Cần trau dồi kỹ năng phân tích dữ liệu nhân sự (People Analytics) và đánh giá hiệu quả đầu tư (ROI).` : '',
+        'Làm quen với các chỉ số hiệu suất doanh nghiệp (KPI, OKR) bên cạnh các tiêu chí tâm lý thuần túy.'
+      ].filter(Boolean)
     },
     {
       id: 'cluster_5',
       name: 'Cụm 5: Tâm lý Tiêu dùng, Tiếp thị & Kinh tế Hành vi',
-      legal: 'Thương mại & Dịch vụ: Các tập đoàn bán lẻ, sàn TMĐT, Fintech, Marketing Agency.',
-      apa: 'APA Div 23 (Consumer Psychology), Div 46 (Media & Tech)',
-      desc: 'Nghiên cứu hành vi người tiêu dùng, thiết kế cú hích hành vi (Nudge), tối ưu hóa trải nghiệm khách hàng.',
-      match: Math.round(s.d4_data_t * 0.35 + s.d3_emp_t * 0.25 + s.d2_amb_t * 0.25 + s.d1_macro_t * 0.15)
+      legal: 'Luật Thương mại & Luật Bảo vệ Quyền lợi Người tiêu dùng: Các tập đoàn bán lẻ, thương mại điện tử, công ty nghiên cứu thị trường và agency truyền thông.',
+      apa: 'APA Div 23 (Society for Consumer Psychology), Div 46 (Society for Media Psychology and Technology)',
+      desc: 'Giải mã quá trình ra quyết định của khách hàng, ứng dụng các hiệu ứng thiên kiến nhận thức (Cognitive Biases) và thiết kế cú hích hành vi (Nudge) để tối ưu hóa chiến lược tiếp thị.',
+      formulaExplanation: 'Chỉ số tương thích = 35% Xử lý dữ liệu + 25% Phân tích thực nghiệm + 25% Dung nạp mơ hồ + 15% Quy mô vĩ mô',
+      match: calcMatch(s.d4_data_t * 0.35 + s.d3_emp_t * 0.25 + s.d2_amb_t * 0.25 + s.d1_macro_t * 0.15),
+      coreDrivers: [
+        s.d4_data_t >= 55 ? `Tư duy dữ liệu (T=${s.d4_data_t}) giúp bóc tách hành vi người dùng qua các bộ chỉ số định lượng.` : '',
+        s.d2_amb_t >= 55 ? `Khả năng dung nạp bất định (T=${s.d2_amb_t}) thích ứng tốt với sự biến động nhanh của thị trường.` : ''
+      ].filter(Boolean),
+      growthAreas: [
+        s.d3_tec_t < 50 ? `Cần bổ sung kiến thức về công cụ phân tích dữ liệu số (Google Analytics, SQL, Python căn bản).` : '',
+        'Chú ý cân bằng giữa mục tiêu lợi nhuận thương mại và đạo đức bảo vệ người tiêu dùng.'
+      ].filter(Boolean)
     },
     {
       id: 'cluster_6',
       name: 'Cụm 6: Công thái Nhận thức, Trải nghiệm Người dùng (UX) & Não bộ',
-      legal: 'Công nghệ & Đổi mới sáng tạo: Công ty phần mềm, AI Labs, Studio Game.',
-      apa: 'APA Div 21 (Applied Experimental & Engineering), Div 3, Div 6, Div 40',
-      desc: 'UX Researcher, thiết kế tương tác người - máy tính, ứng dụng khoa học thần kinh và đánh giá an toàn AI.',
-      match: Math.round(s.d3_tec_t * 0.4 + s.d4_data_t * 0.3 + s.d4_things_t * 0.2 + s.d2_amb_t * 0.1)
+      legal: 'Luật Công nghệ thông tin & Sở hữu trí tuệ: Các công ty phần mềm, studio trò chơi, trung tâm nghiên cứu AI và các phòng thí nghiệm tương tác Người - Máy (HCI).',
+      apa: 'APA Div 21 (Applied Experimental & Engineering Psychology), Div 3 (Experimental Psychology), Div 40 (Clinical Neuropsychology)',
+      desc: 'Nghiên cứu mô hình tải nhận thức (Cognitive Load), bản đồ chú ý thị giác và khả năng phản xạ hành vi nhằm thiết kế giao diện số, thiết bị thông minh và đảm bảo an toàn trải nghiệm người dùng.',
+      formulaExplanation: 'Chỉ số tương thích = 40% Kỹ thuật công nghệ + 30% Phân tích dữ liệu + 20% Tác nghiệp công cụ + 10% Linh hoạt nhận thức',
+      match: calcMatch(s.d3_tec_t * 0.4 + s.d4_data_t * 0.3 + s.d4_things_t * 0.2 + s.d2_amb_t * 0.1),
+      coreDrivers: [
+        s.d3_tec_t >= 55 ? `Sự nhạy bén với công nghệ (T=${s.d3_tec_t}) giúp bắc cầu giữa tâm lý học nhận thức và lập trình sản phẩm.` : '',
+        s.d4_data_t >= 55 ? `Năng lực xử lý dữ liệu kiểm thử (T=${s.d4_data_t}) tối ưu hóa độ chính xác của các bài A/B Testing.` : ''
+      ].filter(Boolean),
+      growthAreas: [
+        s.d4_things_t < 50 ? `Cần thực hành thêm các phương pháp phỏng vấn người dùng định tính (Usability Testing).` : '',
+        'Trau dồi kỹ năng sử dụng công cụ thiết kế nguyên mẫu (Figma, ProtoPie).'
+      ].filter(Boolean)
     },
     {
       id: 'cluster_7',
       name: 'Cụm 7: Tâm lý Thể thao, Hiệu suất Đỉnh cao & Nghệ thuật',
-      legal: 'Thể thao chuyên nghiệp & Nghệ thuật: Trung tâm HLTT Quốc gia, CLB Esports.',
-      apa: 'APA Div 47 (Sport & Exercise Psychology), Div 10 (Aesthetics & Creativity)',
-      desc: 'Huấn luyện tâm lý thi đấu đỉnh cao, duy trì trạng thái dòng chảy (Flow), phục hồi tâm lý sau thất bại.',
-      match: Math.round(s.d1_micro_t * 0.3 + s.d3_emp_t * 0.3 + (80 - s.d5_pd_t) * 0.2 + s.d2_amb_t * 0.2)
+      legal: 'Luật Thể dục, Thể thao: Các trung tâm huấn luyện thể thao quốc gia, câu lạc bộ bóng đá chuyên nghiệp, đội tuyển Thể thao điện tử (Esports) và học viện nghệ thuật.',
+      apa: 'APA Div 47 (Society for Sport, Exercise & Performance Psychology), Div 10 (Society for the Psychology of Aesthetics, Creativity and the Arts)',
+      desc: 'Huấn luyện kỹ năng tâm lý (PST), duy trì sự tập trung dưới áp lực thi đấu, điều hòa lo âu trước trận đấu, phục hồi tâm lý sau chấn thương và duy trì trạng thái dòng chảy (Flow).',
+      formulaExplanation: 'Chỉ số tương thích = 30% Hỗ trợ cá nhân + 30% Phương pháp thực nghiệm + 20% Vững vàng cảm xúc + 20% Ứng biến tình huống',
+      match: calcMatch(s.d1_micro_t * 0.3 + s.d3_emp_t * 0.3 + (80 - s.d5_pd_t) * 0.2 + s.d2_amb_t * 0.2),
+      coreDrivers: [
+        s.d5_pd_t < 48 ? `Tâm lý vững vàng không bị lây lan hoảng loạn (T=${s.d5_pd_t}) là phẩm chất then chốt khi đồng hành với vận động viên.` : '',
+        s.d3_emp_t >= 55 ? `Áp dụng các kỹ thuật phản hồi sinh học (Biofeedback) và đo lường thời gian phản xạ bài bản.` : ''
+      ].filter(Boolean),
+      growthAreas: [
+        'Cần hiểu biết sâu về đặc thù vận động học thể chất và cơ chế sinh lý gắng sức.',
+        'Môi trường thể thao chuyên nghiệp đòi hỏi khả năng di chuyển liên tục theo mùa thi đấu.'
+      ].filter(Boolean)
     },
     {
       id: 'cluster_8',
       name: 'Cụm 8: Tâm lý Pháp y, Tội phạm & An ninh Tư pháp',
-      legal: 'Tư pháp & Y tế công lập: Viện Pháp y Tâm thần Trung ương, Tòa án, Trại giam.',
-      apa: 'APA Div 41 (Psychology and Law), Div 18 (Public Service)',
-      desc: 'Giám định tâm thần tư pháp, đánh giá nguy cơ tái phạm, tâm lý học lời khai và bảo vệ nhân chứng.',
-      match: Math.round(s.d3_emp_t * 0.35 + (80 - s.d5_pd_t) * 0.25 + s.d1_macro_t * 0.2 + s.d2_amb_t * 0.2)
+      legal: 'Luật Giám định tư pháp & Bộ luật Tố tụng Hình sự: Viện Pháp y Tâm thần Trung ương, tòa án, cơ sở giam giữ và các cơ quan bảo vệ pháp luật.',
+      apa: 'APA Div 41 (American Psychology-Law Society), Div 18 (Psychologists in Public Service)',
+      desc: 'Đánh giá năng lực hành vi và trách nhiệm hình sự, giám định tâm thần tư pháp, phân tích động cơ hành vi tội phạm, hỗ trợ tâm lý nạn nhân và người làm chứng tại tòa.',
+      formulaExplanation: 'Chỉ số tương thích = 35% Bằng chứng thực nghiệm + 25% Vững vàng cảm xúc + 20% Tầm nhìn quy chuẩn pháp luật + 20% Dung nạp phức tạp',
+      match: calcMatch(s.d3_emp_t * 0.35 + (80 - s.d5_pd_t) * 0.25 + s.d1_macro_t * 0.2 + s.d2_amb_t * 0.2),
+      coreDrivers: [
+        s.d3_emp_t >= 55 ? `Tư duy logic chứng cứ chặt chẽ (T=${s.d3_emp_t}) đảm bảo tính hợp thức của báo cáo giám định tư pháp.` : '',
+        s.d5_pd_t < 48 ? `Khả năng giữ vững sự bình thản trước các tình tiết phạm tội bạo lực hoặc sang chấn nặng nề.` : ''
+      ].filter(Boolean),
+      growthAreas: [
+        'Yêu cầu nắm vững hệ thống văn bản quy phạm pháp luật và tố tụng hình sự Việt Nam.',
+        'Đòi hỏi tính liêm chính nghề nghiệp tuyệt đối và quy trình bảo vệ chứng cứ nghiêm ngặt.'
+      ].filter(Boolean)
     },
     {
       id: 'cluster_9',
       name: 'Cụm 9: Nghiên cứu Học thuật, Giảng dạy & Đo lường Tâm trắc',
-      legal: 'Giáo dục Đại học & Viện Hàn lâm: Các trường ĐH, Viện nghiên cứu, tổ chức NGO.',
-      apa: 'APA Div 2 (Teaching), Div 5 (Quantitative Methods & Psychometrics), Div 27 (Community)',
-      desc: 'Giảng dạy đại học, chuẩn hóa thang đo tâm trắc học, nghiên cứu chính sách an sinh xã hội.',
-      match: Math.round(s.d4_data_t * 0.35 + s.d3_emp_t * 0.25 + s.d1_macro_t * 0.25 + s.d8_fut_t * 0.15)
+      legal: 'Luật Giáo dục Đại học & Luật Khoa học và Công nghệ: Các trường đại học, viện nghiên cứu chuyên ngành, tổ chức quốc tế và các cơ quan khảo thí.',
+      apa: 'APA Div 2 (Society for the Teaching of Psychology), Div 5 (Quantitative and Qualitative Methods / Evaluation, Measurement & Statistics)',
+      desc: 'Giảng dạy các bộ môn tâm lý học, thiết kế và thẩm định độ tin cậy/độ hiệu lực của thang đo tâm trắc (Psychometrics), thực hiện các đề tài nghiên cứu cơ bản và ứng dụng.',
+      formulaExplanation: 'Chỉ số tương thích = 35% Tư duy số liệu + 25% Phương pháp nghiên cứu + 25% Tầm nhìn vĩ mô + 15% Cam kết học thuật dài hạn',
+      match: calcMatch(s.d4_data_t * 0.35 + s.d3_emp_t * 0.25 + s.d1_macro_t * 0.25 + s.d8_fut_t * 0.15),
+      coreDrivers: [
+        s.d4_data_t >= 55 ? `Khả năng làm việc với số liệu thống kê (T=${s.d4_data_t}) là công cụ then chốt trong nghiên cứu định lượng.` : '',
+        s.d8_fut_t >= 55 ? `Cam kết dài hạn và định hướng học tập suốt đời (T=${s.d8_fut_t}) phù hợp với con đường học thuật.` : ''
+      ].filter(Boolean),
+      growthAreas: [
+        s.d3_emp_t < 52 ? `Cần trau dồi các phương pháp thống kê nâng cao (EFA, CFA, SEM) và kỹ năng viết bài báo khoa học chuẩn APA.` : '',
+        'Lộ trình giảng dạy đại học thường yêu cầu học vị tối thiểu từ Thạc sĩ hoặc Tiến sĩ trở lên.'
+      ].filter(Boolean)
     }
   ];
 
   return clusters.sort((a, b) => b.match - a.match);
 }
 
-// Evaluate 9 Configural Rules
+// Evaluate 9 Configural Rules with neutral, non-hyperbolic academic terminology
 export function evaluateConfiguralRules(s: DimensionScores): ConfiguralRuleResult[] {
   return [
     {
       id: 'RULE_01',
-      name: 'Sức Bật Sang Chấn (Trauma Resilience)',
+      name: 'Năng Lực Phân Ly Cảm Xúc Khách Quan Trong Ca Khó',
       triggered: (s.d5_pt_t > 58 && s.d5_pd_t < 44 && s.d2_amb_t > 52),
       type: 'positive',
-      roadmap: 'Tập trung phòng ngừa mệt mỏi thấu cảm (Compassion Fatigue). Thực hành nhật ký tự phản tỉnh sau ca.',
-      feedback: 'Hồ sơ của bạn cho thấy khả năng duy trì góc nhìn khách quan và điều hòa cảm xúc tốt trước các câu chuyện mang tính sang chấn (Div 56, 41).'
+      roadmap: 'Duy trì thói quen viết nhật ký tự phản tư sau mỗi ca làm việc và tham vấn giám sát định kỳ để phòng ngừa mệt mỏi thấu cảm tích lũy.',
+      feedback: 'Hồ sơ phản ánh khả năng đồng cảm nhận thức cao đi kèm sự vững vàng nội tâm, giúp bạn duy trì góc nhìn chuyên môn sáng suốt khi tiếp xúc với các ca bệnh có diễn tiến phức tạp.'
     },
     {
       id: 'RULE_02',
-      name: 'Cứu Rỗi & Nguy Cơ Ranh Giới (Savior / Boundary Risk)',
+      name: 'Khuynh Hướng Hy Sinh Tự Thân & Nguy Cơ Ranh Giới Chuyên Môn',
       triggered: (s.d7_sac_t > 58 && s.d8_fse_t < 46 && s.d3_rel_t > 58),
       type: 'warning',
-      roadmap: 'Giám sát dựa trên tâm trí hóa (Mentalization). Phân định nhu cầu thân chủ và nhu cầu "được cần đến" của bản thân.',
-      feedback: 'Bạn có lòng trắc ẩn sâu sắc. Thiết lập ranh giới can thiệp rõ ràng sẽ là công cụ bảo vệ bạn bền vững và trao quyền tự chủ cho thân chủ.'
+      roadmap: 'Tập trung giám sát về ranh giới hành nghề (Boundaries in Counseling), phân định rõ nhu cầu tự thân và mục tiêu trị liệu của thân chủ.',
+      feedback: 'Bạn sở hữu sự tận tụy và lòng trắc ẩn sâu sắc. Tuy nhiên, việc nhận thức rõ ranh giới chuyên môn là điều kiện tiên quyết để bảo vệ năng lượng hành nghề lâu dài và tôn trọng quyền tự chủ của người nhận dịch vụ.'
     },
     {
       id: 'RULE_03',
-      name: 'Nhà Vận Động Hệ Thống (Systemic Advocate)',
+      name: 'Định Hướng Vận Động Chính Sách & Hệ Thống Vĩ Mô',
       triggered: (s.d4_people_t > 58 && s.d1_macro_t > 56 && s.d2_amb_t > 50),
       type: 'positive',
-      roadmap: 'Rèn luyện khả năng chịu đựng sự trì trệ của hệ thống (Frustration tolerance). Xây dựng liên minh đa ngành.',
-      feedback: 'Với tư duy vĩ mô và sự nhạy bén với cấu trúc xã hội, bạn có tiềm năng tạo chuyển biến ở tầm chính sách và cộng đồng (Div 27, 9).'
+      roadmap: 'Phát triển kỹ năng quản lý dự án cộng đồng, nghiên cứu chính sách an sinh và hợp tác liên ngành giữa tâm lý học, y tế công cộng và công tác xã hội.',
+      feedback: 'Bạn có sự nhạy bén đặc biệt với các yếu tố văn hóa, thể chế và cấu trúc xã hội tác động lên sức khỏe tâm thần, phù hợp với các vai trò điều phối chương trình quy mô rộng.'
     },
     {
       id: 'RULE_04',
-      name: 'Kiến Trúc Sư Công Thái Nhận Thức (Cognitive / Data Architect)',
+      name: 'Định Hướng Dữ Liệu & Công Thái Học Nhận Thức',
       triggered: (Math.max(s.d4_things_t, s.d4_data_t) > 58 && s.d3_emp_t > 56 && s.d5_pt_t <= 55),
       type: 'positive',
-      roadmap: 'Phát triển các dự án ứng dụng Tâm trắc học, AI, Yếu tố con người. Giám sát viên đóng vai trò cố vấn chuyên môn.',
-      feedback: 'Hồ sơ của bạn nổi bật với tư duy hệ thống và phân tích dữ liệu (Div 21, 14, 5). Bạn là kiến trúc sư kiến tạo các quy trình chuẩn xác.'
+      roadmap: 'Đầu tư phát triển chuyên môn trong lĩnh vực Tâm trắc học (Psychometrics), Trải nghiệm người dùng (UX Research) hoặc Đánh giá an toàn AI.',
+      feedback: 'Hồ sơ nổi bật với tư duy logic, phân tích định lượng và sự chuẩn xác trong quy trình phương pháp luận, là tố chất quan trọng của nhà nghiên cứu thực nghiệm.'
     },
     {
       id: 'RULE_05',
-      name: 'Ngập Lụt Thấu Cảm & Tê Liệt Thực Tập Sinh (Empathic Flooding)',
+      name: 'Độ Nhạy Cảm Xúc Cao & Nguy Cơ Quá Tải Thấu Cảm',
       triggered: (s.d5_pd_t > 60 && s.d2_amb_t < 44),
       type: 'critical',
-      roadmap: 'Can thiệp hỗ trợ sớm ở IDM Level 1: Giảm tải ca bệnh nặng, áp dụng kỹ thuật xoa dịu cảm xúc (Grounding).',
-      feedback: 'Độ nhạy cảm cảm xúc của bạn rất cao. Cần rèn luyện tấm màng lọc cảm xúc để bảo vệ nội lực trước khi bước vào các ca lâm sàng nặng.'
+      roadmap: 'Ưu tiên làm việc với Giám sát viên về kỹ thuật tiếp đất (Grounding) và điều hòa xúc cảm. Cân đối khối lượng công việc, tránh tiếp nhận dồn dập các ca sang chấn nặng.',
+      feedback: 'Bạn có sự nhạy bén cảm xúc rất cao. Cần xây dựng chiến lược tự chăm sóc bản thân (Self-care protocol) để giữ gìn sự cân bằng tâm lý trước khi bước vào các bối cảnh lâm sàng áp lực cao.'
     },
     {
       id: 'RULE_06',
-      name: 'Cuồng Tín Đạo Đức vs Quán Tính Thể Chế (Moral Zealot)',
+      name: 'Khoảng Cách Giữa Lý Tưởng Cải Cách & Quán Tính Thể Chế',
       triggered: (s.d1_macro_t > 60 && s.d2_amb_t < 42),
       type: 'warning',
-      roadmap: 'Dạy kỹ năng "chiến lược gia" thay vì "chiến binh". Phát triển tư duy biện chứng (Dialectical thinking).',
-      feedback: 'Lý tưởng cải cách xã hội của bạn rất cao. Hãy trang bị sự kiên nhẫn với các tiến trình chuyển đổi chậm chạp của tổ chức.'
+      roadmap: 'Rèn luyện tư duy biện chứng và tính kiên nhẫn trước các quy trình hành chính, chia nhỏ các mục tiêu cải tổ thành những bước can thiệp khả thi ngắn hạn.',
+      feedback: 'Bạn mang trong mình lý tưởng phụng sự xã hội lớn. Việc trang bị sự thấu hiểu về tiến trình chuyển đổi của các tổ chức sẽ giúp bạn tránh cảm giác bất lực hoặc kiệt sức sớm.'
     },
     {
       id: 'RULE_07',
-      name: 'Kỹ Thuật Viên Lạnh Lùng / Trí Thức Hóa (Cold Intellectualizer)',
+      name: 'Khuynh Hướng Trí Thức Hóa & Ưu Tiên Quy Trình Kỹ Thuật',
       triggered: (s.d3_emp_t > 60 && s.d5_pt_t > 55 && s.d6_rfq_t < 45),
       type: 'warning',
-      roadmap: 'Giám sát qua băng hình ca lâm sàng, tập trung vào tiến trình tương tác (Process) "tại đây và lúc này" thay vì lý thuyết thuần túy.',
-      feedback: 'Bạn nắm rất vững công cụ kỹ thuật. Hãy bổ sung sự kết nối cảm xúc chân thực để nuôi dưỡng liên minh trị liệu bền chặt.'
+      roadmap: 'Thực hành quan sát tiến trình tương tác (Process) trong buổi làm việc, chú ý đến các tín hiệu cảm xúc phi ngôn ngữ bên cạnh các triệu chứng mô tả.',
+      feedback: 'Bạn nắm rất vững các công cụ lượng giá kỹ thuật. Việc bổ sung sự kết nối cảm xúc tự nhiên sẽ giúp liên minh trị liệu của bạn trở nên gắn kết và ấm áp hơn.'
     },
     {
       id: 'RULE_08',
-      name: 'Cân Bằng Lâm Sàng - Thương Mại (Clinical-Commercial Dilemma)',
+      name: 'Định Hướng Thực Hành Kép (Lâm Sàng & Doanh Nghiệp)',
       triggered: (s.d3_rel_t > 58 && s.d1_meso_t > 55),
       type: 'positive',
-      roadmap: 'Khuyến nghị mô hình "Thực hành Kép (Hybrid Trajectory)": EAP Doanh nghiệp kết hợp phòng tham vấn tư nhân.',
-      feedback: 'Khao khát chữa lành nhân văn hoàn toàn có thể song hành cùng sự độc lập tài chính thông qua các dịch vụ EAP và doanh nghiệp.'
+      roadmap: 'Tìm hiểu mô hình dịch vụ Hỗ trợ Nhân viên (EAP) và tham vấn sức khỏe tâm thần tại nơi làm việc, kết hợp linh hoạt giữa chuyên môn tâm lý và kỹ năng quản trị.',
+      feedback: 'Hồ sơ cho thấy sự giao thoa hài hòa giữa năng lực thấu hiểu con người và tư duy vận hành nhóm, mở ra tiềm năng hoạt động trong cả môi trường tham vấn tư nhân lẫn khối doanh nghiệp.'
     },
     {
       id: 'RULE_09',
-      name: 'Hội Chứng Kẻ Giả Mạo & Bất An Giám Sát (Imposter Defense)',
+      name: 'Băn Khoăn Năng Lực Tự Thân Giai Đoạn Khởi Nghiệp',
       triggered: (s.d8_fut_t > 58 && s.d8_fse_t < 44 && s.d5_pt_t > 56),
       type: 'warning',
-      roadmap: 'Giám sát viên thiết lập môi trường an toàn tâm lý tuyệt đối, phản hồi dựa trên điểm mạnh (Strengths-based Feedback).',
-      feedback: 'Sự cầu thị học hỏi của bạn rất đáng quý. Hãy nhớ sự bất an trong những bước đi đầu tiên là trải nghiệm phổ quát của mọi nhà thực hành.'
+      roadmap: 'Tham gia các nhóm hỗ trợ đồng đẳng (Peer Support Group), tìm kiếm Giám sát viên mang phong cách nuôi dưỡng để nhận các phản hồi dựa trên điểm mạnh.',
+      feedback: 'Sự thận trọng và tinh thần cầu thị của bạn rất đáng trân trọng. Hãy nhớ rằng cảm giác bỡ ngỡ trong những năm đầu hành nghề là trải nghiệm phổ biến của hầu hết các nhà thực hành tâm lý.'
     }
   ];
 }

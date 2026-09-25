@@ -8,11 +8,25 @@ export type AppPhase = 'landing' | 'consent' | 'test' | 'checkpoint' | 'report';
 
 export const DIMENSIONS_ORDER: Dimension[] = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8'];
 
+export function generateParticipantCode(): string {
+  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let rand = '';
+  for (let i = 0; i < 4; i++) {
+    rand += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  const digits = Math.floor(1000 + Math.random() * 9000);
+  return `MVAB-${rand}-${digits}`;
+}
+
 interface TestState {
   // Navigation & Phases
   phase: AppPhase;
   currentDimIndex: number; // 0 to 7
   
+  // Participant & Study Norming
+  participantCode: string;
+  hasConsentedToStudy: boolean;
+
   // Responses & Latency
   responses: Record<string, number>; // itemId -> value (1-5)
   latencies: Record<string, number>; // itemId -> milliseconds
@@ -25,6 +39,8 @@ interface TestState {
 
   // Actions
   setPhase: (phase: AppPhase) => void;
+  setParticipantCode: (code: string) => void;
+  setHasConsentedToStudy: (consented: boolean) => void;
   startAssessment: () => void;
   recordQuestionStart: () => void;
   answerQuestion: (itemId: string, value: number) => void;
@@ -48,6 +64,8 @@ export const useTestStore = create<TestState>()(
     (set, get) => ({
       phase: 'landing',
       currentDimIndex: 0,
+      participantCode: '',
+      hasConsentedToStudy: true,
       responses: {},
       latencies: {},
       currentQuestionStartTime: Date.now(),
@@ -56,12 +74,21 @@ export const useTestStore = create<TestState>()(
       delayedGratificationScore: 0,
 
       setPhase: (phase) => set({ phase }),
+      setParticipantCode: (code) => set({ participantCode: code }),
+      setHasConsentedToStudy: (hasConsentedToStudy) => set({ hasConsentedToStudy }),
 
-      startAssessment: () => set({
-        phase: 'test',
-        currentDimIndex: 0,
-        currentQuestionStartTime: Date.now()
-      }),
+      startAssessment: () => {
+        let code = get().participantCode;
+        if (!code) {
+          code = generateParticipantCode();
+        }
+        set({
+          phase: 'test',
+          currentDimIndex: 0,
+          participantCode: code,
+          currentQuestionStartTime: Date.now()
+        });
+      },
 
       recordQuestionStart: () => set({
         currentQuestionStartTime: Date.now()
@@ -120,6 +147,7 @@ export const useTestStore = create<TestState>()(
       resetAll: () => set({
         phase: 'landing',
         currentDimIndex: 0,
+        participantCode: '',
         responses: {},
         latencies: {},
         currentQuestionStartTime: Date.now(),
@@ -167,6 +195,8 @@ export const useTestStore = create<TestState>()(
       partialize: (state) => ({
         phase: state.phase,
         currentDimIndex: state.currentDimIndex,
+        participantCode: state.participantCode,
+        hasConsentedToStudy: state.hasConsentedToStudy,
         responses: state.responses,
         latencies: state.latencies,
         checkpointChoices: state.checkpointChoices,

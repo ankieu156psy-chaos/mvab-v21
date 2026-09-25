@@ -100,6 +100,9 @@ export interface CareerMatch {
   apa: string;
   legal: string;
   desc: string;
+  formulaExplanation: string;
+  coreDrivers: string[];
+  growthAreas: string[];
 }
 
 export interface ConfiguralRuleResult {
