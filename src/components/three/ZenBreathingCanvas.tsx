@@ -19,24 +19,24 @@ export const ZenBreathingCanvas: React.FC = () => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     container.appendChild(renderer.domElement);
 
-    // Delicate Zen Wireframe Sphere
+    // Delicate Ancient Jade & Amber Relic (Viên Ngọc Thiền)
     const geometry = new THREE.IcosahedronGeometry(1.8, 2);
     const material = new THREE.MeshBasicMaterial({
-      color: 0x6366f1,
+      color: 0x0d9488, // Celadon Jade Green
       wireframe: true,
       transparent: true,
-      opacity: 0.35
+      opacity: 0.4
     });
 
     const sphere = new THREE.Mesh(geometry, material);
     scene.add(sphere);
 
-    // Inner Core Glow
-    const coreGeo = new THREE.SphereGeometry(0.8, 16, 16);
+    // Inner Core Warm Amber Glow
+    const coreGeo = new THREE.SphereGeometry(0.85, 16, 16);
     const coreMat = new THREE.MeshBasicMaterial({
-      color: 0x818cf8,
+      color: 0xd97706, // Warm Amber Gold
       transparent: true,
-      opacity: 0.2
+      opacity: 0.25
     });
     const core = new THREE.Mesh(coreGeo, coreMat);
     scene.add(core);

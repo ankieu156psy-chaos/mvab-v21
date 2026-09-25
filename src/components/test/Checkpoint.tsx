@@ -69,16 +69,73 @@ export const Checkpoint: React.FC = () => {
     proceedToNextDimension();
   };
 
-  // Viewport camera focus coordinates for the 8 dimensions
-  const DIMENSION_VIGNETTES: { name: string; spot: string; transform: string }[] = [
-    { name: 'Thủy Đình Bến Đỗ', spot: 'Góc hồ tĩnh lặng', transform: 'scale(1.5) translate(18%, -8%)' },
-    { name: 'Đỉnh Núi Mây Mờ', spot: 'Dãy sơn khê xa xăm', transform: 'scale(1.7) translate(-12%, 18%)' },
-    { name: 'Cầu Đá & Thôn Xóm', spot: 'Nơi kết nối tương giao', transform: 'scale(1.6) translate(-24%, -10%)' },
-    { name: 'Thuyền Nan Giữa Dòng', spot: 'Dòng nước phẳng lặng', transform: 'scale(1.8) translate(8%, -4%)' },
-    { name: 'Đàn Cá Vờn Sen', spot: 'Đáy nước trong ngần', transform: 'scale(1.9) translate(26%, -18%)' },
-    { name: 'Cánh Chim Trời Xanh', spot: 'Không gian khoáng đạt', transform: 'scale(1.6) translate(10%, 20%)' },
-    { name: 'Đài Sen Nở Rộ', spot: 'Tâm điểm thuần khiết', transform: 'scale(2.0) translate(-15%, -22%)' },
-    { name: 'Toàn Cảnh Bát Trục', spot: 'Bức tranh trọn vẹn', transform: 'scale(1.1) translate(0%, 0%)' },
+  // Sequential journey from FOREGROUND to DEEP BACKGROUND across 8 dimensions
+  const DIMENSION_VIGNETTES: { 
+    roman: string; 
+    name: string; 
+    depth: string; 
+    spot: string; 
+    transform: string;
+    asset?: string;
+  }[] = [
+    { 
+      roman: 'I', 
+      name: 'Bến Sen & Đàn Cá Koi', 
+      depth: 'Tiền cảnh sát mặt nước', 
+      spot: 'Góc bờ sen nở rộ, nơi khởi sinh những tương tác vi mô trực tiếp', 
+      transform: 'scale(2.2) translate(14%, -24%)',
+      asset: '/assets/lotus-bloom-user.png'
+    },
+    { 
+      roman: 'II', 
+      name: 'Mặt Nước Xuôi Dòng', 
+      depth: 'Làn sóng lăn tăn', 
+      spot: 'Không gian mặt nước phẳng lặng, đối diện sự vô định và mơ hồ', 
+      transform: 'scale(1.9) translate(6%, -15%)'
+    },
+    { 
+      roman: 'III', 
+      name: 'Thủy Đình Bến Đỗ', 
+      depth: 'Trạm dừng chân giữa hồ', 
+      spot: 'Mái đình cổ kính nổi giữa hồ sen, định hình phương pháp thực hành', 
+      transform: 'scale(1.7) translate(-8%, -4%)',
+      asset: '/assets/thuy-dinh-pavilion.png'
+    },
+    { 
+      roman: 'IV', 
+      name: 'Thuyền Nan Giữa Dòng', 
+      depth: 'Trung cảnh lòng hồ', 
+      spot: 'Con thuyền độc mộc lướt sóng, cân nhắc hướng đi giữa con người và dữ liệu', 
+      transform: 'scale(1.6) translate(-2%, 4%)'
+    },
+    { 
+      roman: 'V', 
+      name: 'Cầu Đá Nhịp Cong', 
+      depth: 'Bờ nối tương giao', 
+      spot: 'Nhịp cầu đá bắc sang bờ bên kia, bắc nhịp thấu cảm và giữ vững ranh giới tự ngã', 
+      transform: 'scale(1.5) translate(-20%, 6%)'
+    },
+    { 
+      roman: 'VI', 
+      name: 'Thôn Xóm Bình Yên', 
+      depth: 'Mái ngói rêu phong ven hồ', 
+      spot: 'Xóm làng dưới bóng cây đại thụ, quan sát thế giới nội tâm trong đời sống thực tế', 
+      transform: 'scale(1.4) translate(-28%, -6%)'
+    },
+    { 
+      roman: 'VII', 
+      name: 'Dãy Sơn Khê Bảng Lảng', 
+      depth: 'Hậu cảnh rặng núi xa', 
+      spot: 'Chân núi mây mù bao phủ, nuôi dưỡng động cơ vị tha vì cộng đồng bền vững', 
+      transform: 'scale(1.3) translate(12%, 18%)'
+    },
+    { 
+      roman: 'VIII', 
+      name: 'Đỉnh Cao Bát Trục Toàn Cảnh', 
+      depth: 'Điểm nhìn bao quát giang sơn', 
+      spot: 'Đứng từ đỉnh núi cao nhìn xuống toàn bộ non nước, hoàn tất bức tranh năng lực', 
+      transform: 'scale(1.05) translate(0%, 0%)'
+    },
   ];
 
   const currentVignette = DIMENSION_VIGNETTES[currentDimIndex] || DIMENSION_VIGNETTES[0];
@@ -104,7 +161,7 @@ export const Checkpoint: React.FC = () => {
       <div 
         className="absolute inset-0 pointer-events-none transition-all duration-1000 ease-out"
         style={{
-          transform: `${currentVignette.transform} translate3d(${-mouse.x * 15}px, ${-mouse.y * 12}px, 0)`,
+          transform: `${currentVignette.transform} translate3d(${-mouse.x * 16}px, ${-mouse.y * 12}px, 0)`,
         }}
       >
         <div className="relative w-full h-full">
@@ -112,76 +169,94 @@ export const Checkpoint: React.FC = () => {
             src="/assets/ink-landscape-wide.png"
             alt={currentVignette.name}
             fill
-            className="object-cover opacity-60 mix-blend-multiply"
+            priority
+            className="object-cover opacity-65 mix-blend-multiply"
           />
         </div>
       </div>
 
       {/* Subtle Mist Overlay */}
-      <div className="absolute inset-0 bg-[#f4efe6]/50 backdrop-blur-[2px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[#f4efe6]/50 backdrop-blur-[1.5px] pointer-events-none" />
 
-      {/* 2. Checkpoint Card with Ambient Zen Breathing & Thủy Đình Pavilion */}
+      {/* 2. Checkpoint Card with Antique Dó Parchment Harmony */}
       <div 
-        className="relative max-w-xl w-full z-10 transition-transform duration-300 pt-16 sm:pt-20"
+        className="relative max-w-xl w-full z-10 transition-transform duration-300 pt-14 sm:pt-16"
         style={{
           transform: `translate3d(${mouse.x * 10}px, ${mouse.y * 8}px, 0)`,
         }}
       >
-        {/* Floating Thủy Đình Pavilion Graphic */}
-        <div 
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-48 sm:w-60 h-36 sm:h-44 pointer-events-none z-10 opacity-90 transition-transform duration-500 ease-out"
-          style={{
-            transform: `translate3d(calc(-50% + ${-mouse.x * 14}px), ${-mouse.y * 8}px, 0)`,
-          }}
-        >
-          <Image
-            src="/assets/thuy-dinh-pavilion.png"
-            alt="Thủy Đình Bên Hồ"
-            fill
-            priority
-            className="object-contain object-bottom drop-shadow-md"
-          />
-        </div>
+        {/* Stage-Specific Decorative Graphic (e.g. Thủy Đình on Stage 3, Lotus on Stage 1) */}
+        {currentVignette.asset && (
+          <div 
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-44 sm:w-56 h-32 sm:h-40 pointer-events-none z-10 opacity-90 transition-transform duration-500 ease-out"
+            style={{
+              transform: `translate3d(calc(-50% + ${-mouse.x * 12}px), ${-mouse.y * 8}px, 0)`,
+            }}
+          >
+            <Image
+              src={currentVignette.asset}
+              alt={currentVignette.name}
+              fill
+              priority
+              className="object-contain object-bottom drop-shadow-md"
+            />
+          </div>
+        )}
 
-        <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-9 border border-stone-300/80 shadow-2xl shadow-stone-900/10">
+        <div className="relative bg-[#faf6ee]/95 backdrop-blur-xl rounded-3xl p-6 sm:p-9 border border-stone-300/90 shadow-2xl shadow-stone-900/15">
           
-          {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b border-stone-200/80 mb-5">
-            <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping" />
+          {/* Header with Vermilion Seal Stamp Motif */}
+          <div className="flex items-center justify-between pb-4 border-b border-stone-200/90 mb-5">
+            <div className="flex items-center gap-3">
+              {/* Vermilion Stamp */}
+              <div className="w-7 h-7 rounded bg-[#8b2626] text-amber-50 flex items-center justify-center font-serif text-xs font-bold shadow-sm tracking-tighter">
+                {currentVignette.roman}
+              </div>
               <div>
-                <span className="text-xs font-mono font-bold text-stone-800 tracking-wider uppercase block">
+                <span className="text-xs font-mono font-bold text-stone-900 tracking-wider uppercase block">
                   BẾN ĐỖ {currentDimIndex + 1}/8 · {currentVignette.name}
                 </span>
-                <span className="text-[10px] text-stone-400 font-serif">
-                  {currentVignette.spot}
+                <span className="text-[11px] text-stone-500 font-sans">
+                  {currentVignette.depth}
                 </span>
               </div>
             </div>
-            <span className="text-xs text-stone-500 font-mono px-2.5 py-1 rounded-full bg-stone-100 border border-stone-200">
-              Nghỉ thở: {secondsSpent}s
-            </span>
+
+            <div className="text-right">
+              <span className="text-[11px] text-stone-500 font-mono px-3 py-1 rounded-full bg-stone-200/60 border border-stone-300">
+                Tĩnh tâm: {secondsSpent}s
+              </span>
+            </div>
           </div>
 
-          {/* 3D Ambient Breathing Orb */}
-          <ZenBreathingCanvas />
+          {/* 3D Jade & Amber Breathing Orb */}
+          <div className="my-1">
+            <ZenBreathingCanvas />
+          </div>
 
-          <h3 className="text-xl font-bold text-stone-900 mb-3 tracking-tight text-center">
+          <h3 className="text-lg sm:text-xl font-bold text-stone-900 mb-2 tracking-tight text-center font-sans">
             {insight.title}
           </h3>
 
-          {/* Teaser Paragraph */}
-          <p className="text-stone-700 text-sm sm:text-base leading-relaxed mb-6 font-serif">
+          <p className="text-xs text-rose-800/90 font-medium text-center mb-4 font-sans">
+            {currentVignette.spot}
+          </p>
+
+          {/* Teaser Paragraph (Cliffhanger) */}
+          <p className="text-stone-700 text-xs sm:text-sm leading-relaxed mb-6 text-center font-sans max-w-lg mx-auto">
             {insight.teaser}
           </p>
 
-          {/* Detail Reveal Card (if requested) */}
+          {/* Detail Reveal Card (Styled like an ancient parchment record) */}
           {hasViewedDetail && (
-            <div className="mb-6 p-4 rounded-2xl bg-stone-100/80 border border-stone-300/80 text-sm text-stone-800 leading-relaxed font-serif animate-fade-in">
-              <div className="font-semibold text-rose-800 mb-1 text-xs uppercase tracking-wider font-mono">
-                Phân tích sơ bộ:
+            <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-[#f4ece1]/90 border border-stone-300 text-xs sm:text-sm text-stone-800 leading-relaxed font-sans shadow-inner animate-fade-in">
+              <div className="flex items-center gap-2 font-semibold text-[#8b2626] mb-1.5 text-xs uppercase tracking-wider font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#8b2626]" />
+                Nhận định sơ bộ từ hệ thống:
               </div>
-              {insight.detail}
+              <p className="text-stone-700">
+                {insight.detail}
+              </p>
             </div>
           )}
 
@@ -191,7 +266,7 @@ export const Checkpoint: React.FC = () => {
               <button
                 type="button"
                 onClick={handleReadDetail}
-                className="flex-1 py-3.5 px-4 rounded-full text-xs sm:text-sm font-semibold border border-stone-300 text-stone-800 bg-white/90 hover:bg-stone-50 active:scale-95 transition-all text-center font-mono uppercase tracking-wider"
+                className="flex-1 py-3.5 px-4 rounded-full text-xs font-semibold border border-stone-400/80 text-stone-800 bg-[#f7f2e7] hover:bg-[#ede5d6] active:scale-95 transition-all text-center font-mono uppercase tracking-wider shadow-sm"
               >
                 Xem phân tích chi tiết (30s)
               </button>
@@ -200,10 +275,10 @@ export const Checkpoint: React.FC = () => {
             <button
               type="button"
               onClick={handleProceed}
-              className={`flex-1 py-3.5 px-4 rounded-full text-xs sm:text-sm font-semibold transition-all text-center shadow-md font-mono uppercase tracking-wider ${
+              className={`flex-1 py-3.5 px-5 rounded-full text-xs font-semibold transition-all text-center shadow-md font-mono uppercase tracking-wider ${
                 hasViewedDetail
                   ? 'bg-stone-900 hover:bg-stone-800 text-amber-50 shadow-stone-900/20 active:scale-95'
-                  : 'bg-rose-700 hover:bg-rose-800 text-white shadow-rose-900/20 active:scale-95'
+                  : 'bg-[#8b2626] hover:bg-[#731f1f] text-amber-50 shadow-rose-950/20 active:scale-95'
               }`}
             >
               {hasViewedDetail
@@ -212,8 +287,8 @@ export const Checkpoint: React.FC = () => {
             </button>
           </div>
 
-          <p className="text-[11px] text-stone-400 text-center mt-5 font-serif">
-            Bản phân tích đầy đủ và đề xuất lộ trình sẽ được tổng hợp ở Báo cáo cuối cùng.
+          <p className="text-[11px] text-stone-500 text-center mt-5 font-sans">
+            Bản đồ định vị 9 cụm nghề nghiệp và phân tích cấu hình sẽ được tổng hợp ở Báo cáo chung cuộc.
           </p>
         </div>
       </div>
